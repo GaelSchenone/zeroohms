@@ -1,0 +1,78 @@
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AppleGaramond';
+  src: url('./assets/fonts/apple-garamond/AppleGaramond-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NType82';
+  src: url('./assets/fonts/NType82/NType82-Regular.otf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'NType82';
+  src: url('./assets/fonts/NType82/NType82-Italic.otf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'NType82';
+  src: url('./assets/fonts/NType82/NType82-Bold.otf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+
+/* Percentage-height chain: html/body/#root need a height for 100% to resolve.
+   The homepage background relies on this (height: 100% instead of 100vh). */
+html,
+body,
+#root {
+  height: 100%;
+}
