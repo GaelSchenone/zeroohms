@@ -177,14 +177,25 @@ export default function LedGlitchBackground({
       const el = containerRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return; // no reseteamos con medidas basura
+
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
       cell = propsRef.current.pixelSize;
-      W = clamp(Math.floor(rect.width / cell), 32, 260);
-      H = clamp(Math.floor(rect.height / cell), 18, 160);
 
-      canvas.width = Math.floor(rect.width * dpr) || 1;
-      canvas.height = Math.floor(rect.height * dpr) || 1;
+      const newW = clamp(Math.floor(rect.width / cell), 32, 260);
+      const newH = clamp(Math.floor(rect.height / cell), 18, 160);
+      const newCanvasW = Math.floor(rect.width * dpr) || 1;
+      const newCanvasH = Math.floor(rect.height * dpr) || 1;
+
+      // si nada cambió de verdad, no reconstruyas nada (evita el flash)
+      if (newW === W && newH === H && canvas.width === newCanvasW && canvas.height === newCanvasH) {
+        return;
+      }
+
+      W = newW;
+      H = newH;
+      canvas.width = newCanvasW;
+      canvas.height = newCanvasH;
       canvas.style.width = rect.width + "px";
       canvas.style.height = rect.height + "px";
 
@@ -200,7 +211,6 @@ export default function LedGlitchBackground({
 
       rebuildMask();
     };
-
     resize();
     const ro = new ResizeObserver(resize);
     if (containerRef.current) ro.observe(containerRef.current);

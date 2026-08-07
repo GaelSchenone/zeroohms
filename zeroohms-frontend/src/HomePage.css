@@ -1,18 +1,96 @@
-*{
 
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 body {
   font-family: 'Arial', sans-serif;
   background-color: #000000;
-  color:w
+  color: #fff;
+  overflow-x: hidden;
+  
+ 
+  
 }
 
-.homepage-background {
+.homepage-container {
   position: relative;
   width: 100%;
   height: 100%;
+
+}
+
+.homepage-background {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   opacity: 0.2;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero{
+  width: 100%;
+  height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  padding: 3rem;
+  align-items: start;
+  justify-content: end;
+  gap: 1.2rem;
+}
+
+.hero h1{
+  font-size: 6.5rem;
+}
+
+.hero h1 u{
+  text-decoration: none;
+  
+}
+
+
+.calltoaction-buttons{
+  display: flex;
+  gap: 1rem;
+}
+
+.hero-icons{
+  display: flex;
+  gap: 1.5rem;
+  color: #F0513B;
+}
+
+
+
+.subrayado-animado {
+  display: inline-block;
+  position: relative;
+  --underline-delay: 0.7s;
+  }
+
+/* Creamos la línea debajo del texto usando un pseudoelemento */
+.subrayado-animado::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.25rem; /* Distancia entre el texto y la línea */
+  height: 0.25rem;   /* Grosor de la línea */
+  background-color: #F0513B; /* Color de la línea */
+  display: block;
+  width: 0;
+  transform-origin: left center;
+  pointer-events: none;
+  z-index: 0;
+  
+  /* Iniciamos la animación al cargar la página */
+  animation: expandirLinea 0.3s ease-in-out forwards;
+  animation-delay: var(--underline-delay);
+}
+
+/* Definimos la animación de 0% a 100% de ancho */
+@keyframes expandirLinea {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

@@ -1,0 +1,21 @@
+.homepage-header{
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 3rem;
+}
+
+
+.homepage-header .logo img {
+    width: 100px;
+    height: auto;
+
+}
+.homepage-header .nav{
+    display: flex;
+    gap: 2rem;
+}
