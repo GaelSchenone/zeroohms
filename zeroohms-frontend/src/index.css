@@ -87,21 +87,28 @@ html, body, #root {
   box-sizing: border-box;
 }
 
-body {
+body, p, b{
   font-family: 'Inter', sans-serif;
   color: #fff;
 }
 
 h1{
   font-family: 'AppleGaramond', sans-serif;
-  font-weight: 300;
+  font-weight: 500;
   font-size: 3rem;
   color: #fff;
 }
 
 h2{
-  font-family: 'AppleGaramond', sans-serif;
-  font-weight: 100;
+  font-family: 'Ntype82', sans-serif;
+  font-weight: 400;
+  font-size: 3rem;
+  color: #fff;
+}
+
+h3{
+  font-family: 'NType82';
+  font-weight: 400;
   font-size: 1.8rem;
   color: #fff;
 }

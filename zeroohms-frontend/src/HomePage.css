@@ -10,14 +10,20 @@ body {
 }
 
 .homepage-container {
+  --accent: #F0513B;
   position: relative;
   width: 100%;
-  height: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 
 }
 
 .homepage-background {
-  position: absolute;
+  position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
@@ -31,7 +37,7 @@ body {
   height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
-  padding: 3rem;
+  padding: 5rem 3rem;
   align-items: start;
   justify-content: end;
   gap: 1.2rem;
@@ -39,6 +45,7 @@ body {
 
 .hero h1{
   font-size: 6.5rem;
+  line-height: 1;
 }
 
 .hero h1 u{
@@ -52,11 +59,6 @@ body {
   gap: 1rem;
 }
 
-.hero-icons{
-  display: flex;
-  gap: 1.5rem;
-  color: #F0513B;
-}
 
 
 
@@ -92,5 +94,340 @@ body {
   }
   to {
     width: 100%;
+  }
+}
+
+.hm{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+}
+
+.homepage-services{
+  gap: 10px;
+}
+
+.cards h3{
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.cards{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  
+  
+}
+
+.cards span{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.20);
+  border: 0.2rem solid rgba(255, 255, 255, 0.10);
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+  padding: 2rem 1rem;
+}
+
+.cards span .icons{
+  display: flex;
+  gap: 1rem;
+  color: #F0513B;
+
+}
+
+.aviso-servicio{
+  width: 100%;
+  
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem;
+  font-size: 1rem;
+  background-color: rgba(240, 81, 59, 0.68);
+  color: #ffcac3;
+  backdrop-filter: blur(10px);
+
+  border: 0.2rem solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+
+
+.homepage-reparaciones{
+  
+
+}
+
+.homepage-reparaciones h2{
+  font-weight: 300;
+  margin-bottom: 0.25rem;
+}
+
+.yt-status{
+  padding: 2rem 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.yt-scroll{
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem 0.25rem 1.25rem;
+  scroll-snap-type: x mandatory;
+}
+
+.yt-scroll::-webkit-scrollbar{
+  height: 8px;
+}
+.yt-scroll::-webkit-scrollbar-track{
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.yt-scroll::-webkit-scrollbar-thumb{
+  background: #F0513B;
+  border-radius: 4px;
+}
+
+.yt-card{
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 0.2rem solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.yt-card--placeholder{
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  gap: 0.45rem;
+}
+
+.yt-card--placeholder .yt-thumb{
+  aspect-ratio: 16 / 8.4;
+  background: var(--accent);
+}
+
+.yt-card--placeholder .yt-info{
+  padding: 0;
+}
+
+.yt-card--placeholder .yt-title{
+  font-weight: 400;
+}
+
+.yt-card:hover{
+  transform: translateY(-4px);
+  border-color: #F0513B;
+}
+
+.yt-thumb{
+  aspect-ratio: 16 / 9;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yt-thumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.yt-thumb-placeholder{
+  color: #F0513B;
+  font-size: 2rem;
+}
+
+.yt-info{
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0 0.8rem 0.8rem;
+}
+
+.yt-title{
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.yt-date{
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.homepage-about{
+  gap: 1rem;
+}
+
+.homepage-about h2,
+.homepage-contact h2{
+  font-weight: 300;
+}
+
+.about-panel{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+.about-panel p{
+  font-size: 1.1rem;
+  line-height: 1.35;
+}
+
+.homepage-contact{
+  gap: 1rem;
+}
+
+.contact-actions{
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.contact-button{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  background: #fff;
+  color: #050505;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+
+.contact-button--primary{
+  background: var(--accent);
+  color: #fff;
+}
+
+.homepage-footer{
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+  padding: 2rem 3rem 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.footer-brand,
+.footer-column{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.footer-brand img{
+  width: 100px;
+}
+
+.footer-socials{
+  display: flex;
+
+}
+
+.footer-socials a{
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 1.75rem;
+}
+
+.footer-column strong{
+  margin-bottom: 0.5rem;
+}
+
+.footer-column a,
+.footer-column small{
+  font-size: 0.85rem;
+}
+
+.footer-column small{
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+@media (max-width: 800px){
+  .hero{
+    min-height: calc(100vh - 80px);
+    height: auto;
+    padding: 4rem 1.25rem 3rem;
+  }
+
+  .hero h1{
+    font-size: clamp(3.2rem, 12vw, 6.5rem);
+  }
+
+  .hm{
+    padding: 1.25rem;
+  }
+
+  .homepage-footer{
+    grid-template-columns: 1fr 1fr;
+    padding: 1.5rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 560px){
+  .homepage-header{
+    padding: 1rem 1.25rem;
+  }
+
+  .homepage-header .logo img{
+    width: 76px;
+  }
+
+  .homepage-header .nav{
+    gap: 0.7rem;
+    font-size: 0.7rem;
+  }
+
+  .calltoaction-buttons{
+    flex-wrap: wrap;
+  }
+
+  .cards{
+    grid-template-columns: 1fr;
+  }
+
+  .yt-card,
+  .yt-card--placeholder{
+    flex-basis: 78vw;
+  }
+
+  .about-panel{
+    padding: 1.25rem;
+  }
+
+  .homepage-footer{
+    grid-template-columns: 1fr;
   }
 }
