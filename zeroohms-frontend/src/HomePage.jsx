@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import LedGlitchBackground from "./components/homepage/LedGlitchBackground";
 import Header from "./components/homepage/Header/Header";
@@ -10,6 +11,7 @@ import { FaInstagram, FaYoutube } from 'react-icons/fa'
 const EMAIL = 'contacto@zeroohms.com.ar'
 
 function HomePage() {
+  const navigate = useNavigate()
   const [copied, setCopied] = useState(false)
 
   const handleCopyEmail = async () => {
@@ -52,7 +54,7 @@ function HomePage() {
 
           <div className="calltoaction-buttons">
             <Button text="Contáctanos" onClick={() => document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })} color1="#F0513B" color2="#ffffff" size="l" />
-            <Button text="Seguí tu reparación" onClick={() => document.getElementById('reparaciones')?.scrollIntoView({ behavior: 'smooth' })} color1="#ffffff" color2="#050505" size="l" />
+            <Button text="Seguí tu reparación" onClick={() => navigate('/tracking')} color1="#ffffff" color2="#050505" size="l" />
           </div>
 
             
@@ -117,7 +119,7 @@ function HomePage() {
           <h2>¡Contactanos!</h2>
           <p>Escribinos por Instagram o por email y te respondemos a la brevedad.</p>
           <div className="contact-actions">
-            <a className="contact-button contact-button--primary" href="https://www.instagram.com/zeroohms__/" target="_blank" rel="noreferrer">Escribirnos por Instagram</a>
+            <a className="contact-button contact-button--primary" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">Escribirnos por Instagram</a>
             <a className="contact-button" onClick={handleCopyEmail}>{copied ? '¡Email copiado!' : 'Copiar dirección de Email'}</a>
           </div>
         </section>
