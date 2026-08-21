@@ -1,0 +1,24 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Entorno y secretos
+.env
+.env.*
+*.env
+*.env.local
+!.env.example
+
+# Estado de sesión opencode
+.omo/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editor / OS
+.DS_Store
