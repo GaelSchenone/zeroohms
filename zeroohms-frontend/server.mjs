@@ -1,4 +1,4 @@
-import { createServer } from 'node:http';
+import { createServer, request as httpRequest } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -22,6 +22,7 @@ if (existsSync(envPath)) {
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 const UPLOADS_PLAYLIST = 'UU' + CHANNEL_ID.slice(2);
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -125,6 +126,25 @@ async function serveStatic(res, pathname) {
   res.end(await readFile(full));
 }
 
+function proxyToBackend(req, res) {
+  const backend = new URL(BACKEND_URL);
+  const proxyReq = httpRequest({
+    hostname: backend.hostname,
+    port: backend.port,
+    path: req.url,
+    method: req.method,
+    headers: { ...req.headers, host: backend.host },
+  }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers);
+    proxyRes.pipe(res);
+  });
+  proxyReq.on('error', () => {
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Backend no disponible' }));
+  });
+  req.pipe(proxyReq);
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   if (req.method === 'GET' && url.pathname === '/api/videos') {
@@ -134,6 +154,10 @@ const server = createServer(async (req, res) => {
   }
   if (req.method === 'GET' && url.pathname === '/api/health') {
     sendJson(res, 200, { ok: true, channelId: CHANNEL_ID });
+    return;
+  }
+  if (url.pathname.startsWith('/api/')) {
+    proxyToBackend(req, res);
     return;
   }
   await serveStatic(res, url.pathname);
