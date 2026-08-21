@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { estadoClass, formatEstado } from '../utils/format.js'
-import TicketKanban from './TicketKanban.jsx'
+import TareaKanban from '../components/tickets/TareaKanban.jsx'
 import EstadoButtonRow from '../components/tickets/EstadoButtonRow.jsx'
 import TicketTimeline from '../components/tickets/TicketTimeline.jsx'
 
@@ -308,7 +308,7 @@ export default function TicketDetail() {
 
         {tab === 'tareas' && (
           <div style={{ paddingTop: '1rem' }}>
-            <TicketKanban tkid={id} />
+            <TareaKanban tkid={id} />
           </div>
         )}
 

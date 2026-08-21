@@ -1,0 +1,74 @@
+/* TareaKanban — estilos propios del tablero con drag & drop.
+   La base (.adm-kanban, .adm-kanban-col, .adm-kanban-card, etc.) vive en AdminLayout.css. */
+
+.tk-col{
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.tk-col--over{
+  outline: 2px dashed #7ab0ff;
+  outline-offset: -2px;
+  background: rgba(122, 176, 255, 0.08);
+}
+
+.tk-card{
+  cursor: grab;
+}
+
+.tk-card:active{
+  cursor: grabbing;
+}
+
+.tk-card--dragging{
+  opacity: 0.45;
+}
+
+.tk-prioridad--baja{
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tk-prioridad--media{
+  background: rgba(245, 196, 106, 0.15);
+  color: #f5c46a;
+}
+
+.tk-prioridad--alta{
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.tk-meta{
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.tk-limite{
+  white-space: nowrap;
+}
+
+.tk-form{
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tk-form input,
+.tk-form select{
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: inherit;
+}
+
+.tk-form input[required]{
+  flex: 1 1 220px;
+}
