@@ -1,0 +1,113 @@
+.login-page{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(240, 81, 59, 0.12), transparent 60%),
+    #050505;
+}
+
+.login-card{
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 2.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+}
+
+.login-logo{
+  width: 180px;
+  margin-bottom: 0.5rem;
+}
+
+.login-title{
+  font-family: 'NType82', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+}
+
+.login-subtitle{
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.login-form{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.login-field{
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.login-field span{
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.login-field input{
+  padding: 0.75rem 0.9rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.login-field input:focus{
+  border-color: #F0513B;
+}
+
+.login-error{
+  font-size: 0.85rem;
+  color: #ff8a74;
+}
+
+.login-submit{
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: #F0513B;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.login-submit:hover{
+  filter: brightness(1.1);
+}
+
+.login-hint{
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.login-hint code{
+  padding: 0.1rem 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
