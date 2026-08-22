@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -21,10 +22,26 @@ def verify_password(plain: str, hashed: str) -> bool:
 def create_token(usuario: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
     return jwt.encode(
-        {"sub": usuario, "exp": expire},
+        {"sub": usuario, "typ": "login", "exp": expire},
         settings.JWT_SECRET,
         algorithm=settings.JWT_ALGORITHM,
     )
+
+
+def create_upload_token(tkid: int, usuario: str, minutos: int = 15) -> tuple[str, datetime]:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=minutos)
+    token = jwt.encode(
+        {
+            "sub": usuario,
+            "typ": "upload",
+            "tkid": tkid,
+            "jti": uuid.uuid4().hex,
+            "exp": expire,
+        },
+        settings.JWT_SECRET,
+        algorithm=settings.JWT_ALGORITHM,
+    )
+    return token, expire
 
 
 def verify_token(token: str) -> dict | None:

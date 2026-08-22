@@ -5,9 +5,7 @@ from config.database import get_db
 from models.ticket import Ticket
 from models.dispositivo import Dispositivo
 from models.estados import EstadoTK, PosEstadoTK
-from models.foto import Foto
 from schemas.estados import EstadoResponse
-from schemas.foto import FotoResponse
 from schemas.ticket import TicketDetalle
 
 router = APIRouter(prefix="/api/tracking", tags=["tracking"])
@@ -66,17 +64,6 @@ def track_ticket(codigo: str, db: Session = Depends(get_db)):
             )
         )
 
-    fotos = [
-        FotoResponse(
-            fotoid=f.fotoid,
-            tkid=f.tkid,
-            ruta=f.ruta,
-            nombre=f.nombre,
-            fechasubida=f.fechasubida,
-        )
-        for f in ticket.fotos
-    ]
-
     return TicketDetalle(
         tkid=ticket.tkid,
         codigoseguimiento=ticket.codigoseguimiento,
@@ -95,6 +82,6 @@ def track_ticket(codigo: str, db: Session = Depends(get_db)):
         dispositivo_numeroserie=disp_serie,
         tareas=[],
         presupuestos=[],
-        fotos=fotos,
+        fotos=[],
         historial_estados=historial,
     )
