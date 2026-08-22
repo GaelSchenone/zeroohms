@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from config.settings import settings
 from models import Base
 from config.database import engine
-from routes import auth, tickets, clientes, dispositivos, tareas, presupuestos, checklists, tracking, webhooks, usuarios
+from routes import auth, tickets, clientes, dispositivos, tareas, presupuestos, checklists, tracking, webhooks, usuarios, fotos
 
 app = FastAPI(
     title="Zero Ohms API",
@@ -42,6 +42,7 @@ app.include_router(checklists.router)
 app.include_router(tracking.router)
 app.include_router(webhooks.router)
 app.include_router(usuarios.router)
+app.include_router(fotos.router)
 
 
 @app.get("/api/health")

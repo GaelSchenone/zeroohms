@@ -56,6 +56,16 @@ def traer_objeto(key: str) -> tuple[bytes, str]:
     return datos, content_type
 
 
+def thumb_key(key: str) -> str:
+    carpeta, _, archivo = key.rpartition("/")
+    if "." in archivo:
+        base, ext = archivo.rsplit(".", 1)
+        archivo = f"{base}_thumb.{ext}"
+    else:
+        archivo = f"{archivo}_thumb"
+    return f"{carpeta}/{archivo}" if carpeta else archivo
+
+
 def borrar_objeto(key: str) -> None:
     try:
         client = _get_client()

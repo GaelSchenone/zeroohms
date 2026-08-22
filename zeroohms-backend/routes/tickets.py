@@ -26,6 +26,7 @@ from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
 from routes.presupuestos import _get_estado_actual_pres
 from services.webhook_service import generate_tracking_code, enviar_webhook_estado
 from services.pdf_service import generar_recibo_ingreso, generar_informe_tecnico
+from services.storage_service import borrar_objeto, thumb_key
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
@@ -422,6 +423,10 @@ def delete_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
         db.query(RespuestaIngresada).filter(RespuestaIngresada.ejecucionid.in_(ejecucion_ids)).delete(synchronize_session=False)
     db.query(Ejecucion).filter(Ejecucion.tkid == tkid).delete()
 
+    fotos = db.query(Foto).filter(Foto.tkid == tkid).all()
+    for foto in fotos:
+        borrar_objeto(foto.ruta)
+        borrar_objeto(thumb_key(foto.ruta))
     db.query(Foto).filter(Foto.tkid == tkid).delete()
     db.query(EstadoTK).filter(EstadoTK.tkid == tkid).delete()
 
