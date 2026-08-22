@@ -23,6 +23,7 @@ class Accesorio(Base):
 
     accesorioid = Column("AccesorioID", Integer, primary_key=True, autoincrement=True)
     dispositivoid = Column("DispositivoID", Integer, ForeignKey("Dispositivos.DispositivoID"))
+    tkid = Column("TKID", Integer, ForeignKey("TKs.TKID"), nullable=True)
     nombre = Column("Nombre", String(50))
     referencia = Column("Referencia", String(50))
     foto = Column("Foto", String(255))

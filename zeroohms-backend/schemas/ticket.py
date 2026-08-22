@@ -45,5 +45,6 @@ class TicketDetalle(TicketResponse):
     tareas: list = []
     presupuestos: list = []
     fotos: list = []
+    accesorios: list = []
     ejecuciones: list = []
     historial_estados: list = []

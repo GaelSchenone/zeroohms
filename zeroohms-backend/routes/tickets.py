@@ -12,7 +12,7 @@ from models.ticket import Ticket
 from models.tarea import Tarea
 from models.presupuesto import Presupuesto, ItemPresupuesto
 from models.foto import Foto
-from models.dispositivo import Dispositivo
+from models.dispositivo import Dispositivo, Accesorio
 from models.propietario import Propietario
 from models.estados import EstadoTK, PosEstadoTK, EstadoTarea, EstadoPresupuesto
 from models.ejecucion import Ejecucion, RespuestaIngresada
@@ -20,6 +20,7 @@ from models.checklist import CheckList, Pregunta, Respuesta
 from schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketDetalle
 from schemas.tarea import TareaResponse
 from schemas.foto import FotoResponse
+from schemas.accesorio import AccesorioResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
 from routes.presupuestos import _armar_response as _armar_response_presupuesto
@@ -208,6 +209,17 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
         for f in ticket.fotos
     ]
 
+    accesorios = [
+        AccesorioResponse(
+            accesorioid=a.accesorioid,
+            tkid=a.tkid,
+            dispositivoid=a.dispositivoid,
+            nombre=a.nombre,
+            referencia=a.referencia,
+        )
+        for a in db.query(Accesorio).filter(Accesorio.tkid == tkid).all()
+    ]
+
     ejecuciones_db = (
         db.query(Ejecucion)
         .filter(Ejecucion.tkid == tkid)
@@ -286,6 +298,7 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
         tareas=tareas,
         presupuestos=presupuestos,
         fotos=fotos,
+        accesorios=accesorios,
         ejecuciones=ejecuciones,
         historial_estados=historial,
     )
@@ -415,6 +428,8 @@ def delete_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
     if ejecucion_ids:
         db.query(RespuestaIngresada).filter(RespuestaIngresada.ejecucionid.in_(ejecucion_ids)).delete(synchronize_session=False)
     db.query(Ejecucion).filter(Ejecucion.tkid == tkid).delete()
+
+    db.query(Accesorio).filter(Accesorio.tkid == tkid).delete()
 
     fotos = db.query(Foto).filter(Foto.tkid == tkid).all()
     for foto in fotos:
