@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
-import { formatEstado, estadoClass } from '../utils/format.js'
+import { formatEstado, estadoClass, diasDesde, tonoAntiguedad } from '../utils/format.js'
 import { Plus } from 'pixelarticons/react'
+
+const ESTADOS_TERMINALES = ['entregado', 'cancelado']
 
 const STATUS_FILTERS = ['Todos', 'ticket_creado', 'equipo_recibido', 'diagnostico_realizado', 'esperando_aprobacion', 'en_reparacion', 'reparacion_finalizada', 'listo_para_retirar', 'entregado', 'cancelado']
 
@@ -39,7 +41,7 @@ export default function TicketsList() {
       <input
         type="text"
         className="adm-search-input"
-        placeholder="Buscar por ID, cliente, código, problema…"
+        placeholder="Buscar por ticket, cliente, DNI, N° de serie o problema…"
         value={query}
         onChange={(e) => {
           const val = e.target.value
@@ -69,32 +71,55 @@ export default function TicketsList() {
             <thead>
               <tr>
                 <th>Ticket</th>
-                <th>Código</th>
+                <th>Equipo</th>
                 <th>Problema</th>
                 <th>Estado</th>
-                <th>Fecha</th>
+                <th>Antigüedad</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((t) => (
-                <tr key={t.tkid}>
-                  <td className="adm-td-id">#{t.tkid}</td>
-                  <td>{t.codigoseguimiento || '—'}</td>
-                  <td>{t.descripcionproblema || '—'}</td>
-                  <td>
-                    <span className={`adm-status adm-status--${estadoClass(t.estado_actual)}`}>
-                      {formatEstado(t.estado_actual)}
-                    </span>
-                  </td>
-                  <td>{t.fechacreacion ? new Date(t.fechacreacion).toLocaleDateString('es-AR') : '—'}</td>
-                  <td>
-                    <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
-                      Ver
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((t) => {
+                const equipo = [t.dispositivo_marca, t.dispositivo_modelo].filter(Boolean).join(' ')
+                const cliente = [t.propietario_nombre, t.propietario_apellido].filter(Boolean).join(' ')
+                const dias = diasDesde(t.fecha_ultimo_cambio)
+                const tono = tonoAntiguedad(dias)
+                return (
+                  <tr key={t.tkid}>
+                    <td className="adm-td-id">#{t.tkid}</td>
+                    <td>
+                      <div className="adm-device-cell">
+                        <strong>{equipo || t.codigoseguimiento || '—'}</strong>
+                        <span>
+                          {cliente || 'Sin cliente asignado'}
+                          {t.propietario_dni ? ` · DNI ${t.propietario_dni}` : ''}
+                        </span>
+                      </div>
+                    </td>
+                    <td>{t.descripcionproblema || '—'}</td>
+                    <td>
+                      <span className={`adm-status adm-status--${estadoClass(t.estado_actual)}`}>
+                        {formatEstado(t.estado_actual)}
+                      </span>
+                    </td>
+                    <td>
+                      {ESTADOS_TERMINALES.includes(t.estado_actual) || dias == null ? (
+                        <span className="adm-age adm-age--ok">—</span>
+                      ) : (
+                        <span className={`adm-age adm-age--${tono}`}>
+                          <span className={`adm-age-dot adm-age-dot--${tono}`} />
+                          {dias === 0 ? 'Hoy' : `${dias} día${dias === 1 ? '' : 's'}`}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
+                        Ver
+                      </Link>
+                    </td>
+                  </tr>
+                )
+              })}
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan="6" className="adm-empty">

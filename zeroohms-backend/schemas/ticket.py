@@ -23,6 +23,11 @@ class TicketResponse(BaseModel):
     fechacreacion: datetime | None = None
     estado_actual: str | None = None
     fecha_ultimo_cambio: datetime | None = None
+    propietario_nombre: str | None = None
+    propietario_apellido: str | None = None
+    propietario_dni: str | None = None
+    dispositivo_marca: str | None = None
+    dispositivo_modelo: str | None = None
 
     class Config:
         from_attributes = True

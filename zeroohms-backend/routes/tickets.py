@@ -2,7 +2,7 @@ import random
 from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from config.database import get_db
@@ -52,14 +52,22 @@ def list_tickets(
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
-    q = db.query(Ticket)
+    q = db.query(Ticket).options(joinedload(Ticket.dispositivo).joinedload(Dispositivo.propietario))
 
     if search:
         like = f"%{search}%"
+        q = q.outerjoin(Dispositivo, Ticket.dispositivoid == Dispositivo.dispositivoid)
+        q = q.outerjoin(Propietario, Dispositivo.dni == Propietario.dni)
         q = q.filter(
             or_(
                 Ticket.codigoseguimiento.ilike(like),
                 Ticket.descripcionproblema.ilike(like),
+                Propietario.nombre.ilike(like),
+                Propietario.apellido.ilike(like),
+                Propietario.dni.ilike(like),
+                Dispositivo.marca.ilike(like),
+                Dispositivo.modelo.ilike(like),
+                Dispositivo.numeroserie.ilike(like),
             )
         )
 
@@ -68,6 +76,7 @@ def list_tickets(
     result = []
     for t in tickets:
         info = _get_estado_actual_info_tk(db, t.tkid)
+        propietario = t.dispositivo.propietario if t.dispositivo else None
         result.append(
             TicketResponse(
                 tkid=t.tkid,
@@ -78,6 +87,11 @@ def list_tickets(
                 fechacreacion=t.fechacreacion,
                 estado_actual=info[0] if info else None,
                 fecha_ultimo_cambio=info[1] if info else None,
+                propietario_nombre=propietario.nombre if propietario else None,
+                propietario_apellido=propietario.apellido if propietario else None,
+                propietario_dni=propietario.dni if propietario else None,
+                dispositivo_marca=t.dispositivo.marca if t.dispositivo else None,
+                dispositivo_modelo=t.dispositivo.modelo if t.dispositivo else None,
             )
         )
     return result

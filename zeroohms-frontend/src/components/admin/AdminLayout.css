@@ -1515,6 +1515,25 @@
   background: var(--border);
 }
 
+/* ---- Device/client cell (tickets list) ---- */
+
+.adm-device-cell{
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.adm-device-cell strong{
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.adm-device-cell span{
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
 /* ---- Antigüedad (SLA) ---- */
 
 .adm-age{
