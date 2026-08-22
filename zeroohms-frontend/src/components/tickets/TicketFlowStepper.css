@@ -1,0 +1,145 @@
+.tfs-wrap{
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.tfs{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.tfs-line{
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.tfs-item{
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.5rem 0;
+  z-index: 1;
+}
+
+.tfs-dot{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.tfs-item.is-done .tfs-dot{
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success-text);
+}
+
+.tfs-item.is-current .tfs-dot{
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(240, 81, 59, 0.12);
+}
+
+.tfs-item.is-cancel .tfs-dot{
+  background: rgba(239, 68, 68, 0.15);
+  border-color: var(--danger-text);
+  color: var(--danger-text);
+}
+
+.tfs-body{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-top: 0.15rem;
+}
+
+.tfs-label{
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.tfs-item.is-done .tfs-label{
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tfs-item.is-current .tfs-label{
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tfs-item.is-cancel .tfs-label{
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.tfs-date{
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.tfs-notif{
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.tfs-notif.is-ok{ color: var(--success-text); }
+.tfs-notif.is-off{ color: rgba(255, 255, 255, 0.35); }
+
+.tfs-badge{
+  margin-left: auto;
+  align-self: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.18rem 0.5rem;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.tfs-avanzar{
+  justify-content: center;
+  width: 100%;
+}
+
+.tfs-cancelar{
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.tfs-cancelar:hover{
+  color: var(--danger-text);
+}
+
+.tfs-terminal-msg{
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin: 0;
+}

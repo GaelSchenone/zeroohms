@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { api, apiBlob } from '../api/client.js'
-import { estadoClass, formatEstado } from '../utils/format.js'
+import { estadoClass, formatEstado, formatRelativo } from '../utils/format.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
-import EstadoButtonRow from '../components/tickets/EstadoButtonRow.jsx'
-import TicketTimeline from '../components/tickets/TicketTimeline.jsx'
+import TicketFlowStepper from '../components/tickets/TicketFlowStepper.jsx'
 import AsignarClienteModal from '../components/tickets/AsignarClienteModal.jsx'
 
 const TABS = ['info', 'tareas', 'checklist']
@@ -204,133 +203,146 @@ export default function TicketDetail() {
   if (!ticket) return null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div className="adm-panel">
-        <div className="adm-panel-head">
-          <h2>Ticket #{ticket.tkid}</h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span className={`adm-status adm-status--${estadoClass(ticket.estado_actual)}`}>
-              {formatEstado(ticket.estado_actual)}
-            </span>
-            <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
-              {ticket.codigoseguimiento || ''}
-            </span>
-            <button
-              className="adm-btn adm-btn--subtle"
-              style={{ marginLeft: 'auto' }}
-              onClick={() => abrirPdf('recibo')}
-              disabled={generandoPdf === 'recibo'}
-            >
-              {generandoPdf === 'recibo' ? 'Generando…' : 'Imprimir recibo'}
-            </button>
-            <button
-              className="adm-btn adm-btn--ghost"
-              style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' }}
-              onClick={handleDeleteTicket}
-            >
-              Eliminar ticket
-            </button>
-          </div>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <nav className="adm-crumb">
+        <Link to="/admin/tickets">Tickets</Link>
+        <span>›</span>
+        <strong>#{ticket.tkid}</strong>
+      </nav>
 
-        <div className="adm-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              className={`adm-tab${tab === t ? ' is-active' : ''}`}
-              onClick={() => setTab(t)}
-            >
-              {t === 'info' && 'Información'}
-              {t === 'tareas' && 'Tareas'}
-              {t === 'checklist' && 'Checklist'}
-            </button>
-          ))}
+      <div className="tk-head">
+        <h1 className="tk-head-title">Ticket #{ticket.tkid}</h1>
+        <span className={`adm-status adm-status--${estadoClass(ticket.estado_actual)}`}>
+          {formatEstado(ticket.estado_actual)}
+        </span>
+        <span className="tk-head-code">{ticket.codigoseguimiento || ''}</span>
+        <div className="tk-head-actions">
+          <button
+            className="adm-btn adm-btn--subtle"
+            onClick={() => abrirPdf('recibo')}
+            disabled={generandoPdf === 'recibo'}
+          >
+            {generandoPdf === 'recibo' ? 'Generando…' : 'Imprimir recibo'}
+          </button>
+          <button
+            className="adm-btn adm-btn--ghost"
+            style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' }}
+            onClick={handleDeleteTicket}
+          >
+            Eliminar ticket
+          </button>
         </div>
+      </div>
+
+      <div className="adm-tabs">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            className={`adm-tab${tab === t ? ' is-active' : ''}`}
+            onClick={() => setTab(t)}
+          >
+            {t === 'info' && 'Información'}
+            {t === 'tareas' && 'Tareas'}
+            {t === 'checklist' && 'Checklist'}
+          </button>
+        ))}
+      </div>
 
         {tab === 'info' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '1rem' }}>
-            <section>
-              <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', margin: '0 0 0.75rem' }}>Estado del ticket</h3>
-              <EstadoButtonRow
-                estados={estados}
-                estadoActual={ticket.estado_actual}
-                onChange={handleStateChange}
-                disabled={changing || estadosLoading}
-              />
-            </section>
-
-            <section>
-              <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', margin: '0 0 0.75rem' }}>Historial de estados</h3>
-              <TicketTimeline
-                historial={ticket.historial_estados || []}
-                estadoActual={ticket.estado_actual}
-                estados={estados}
-              />
-            </section>
-
-            <div className="adm-detail-grid">
-              <div className="adm-detail-item">
-                <span className="adm-detail-label">Fecha de creación</span>
-                <span className="adm-detail-value">
-                  {ticket.fechacreacion ? new Date(ticket.fechacreacion).toLocaleString('es-AR') : '—'}
-                </span>
-              </div>
-              <div className="adm-detail-item">
-                <span className="adm-detail-label">Técnico</span>
-                <span className="adm-detail-value">{ticket.usuario || '—'}</span>
-              </div>
-              <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
-                <span className="adm-detail-label">Problema</span>
-                <span className="adm-detail-value">{ticket.descripcionproblema || '—'}</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', margin: 0 }}>Cliente y equipo</h3>
+          <div className="tk-info-grid">
+            <div className="tk-info-col">
+              <div className="adm-panel">
+                <div className="adm-panel-head">
+                  <h2>Cliente y equipo</h2>
                   <button type="button" className="adm-btn adm-btn--subtle adm-btn--sm" onClick={() => setShowAsignar(true)}>
                     Cambiar cliente
                   </button>
                 </div>
-                <div className="adm-detail-grid">
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">Nombre</span>
-                    <span className="adm-detail-value">
-                      {ticket.propietario_nombre || '—'} {ticket.propietario_apellido || ''}
-                    </span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div className="adm-detail-grid">
+                    <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
+                      <span className="adm-detail-label">Cliente</span>
+                      <span className="adm-detail-value">
+                        {ticket.propietario_nombre || '—'} {ticket.propietario_apellido || ''}
+                      </span>
+                    </div>
+                    <div className="adm-detail-item">
+                      <span className="adm-detail-label">DNI</span>
+                      <span className="adm-detail-value">{ticket.propietario_dni || '—'}</span>
+                    </div>
+                    <div className="adm-detail-item">
+                      <span className="adm-detail-label">Teléfono</span>
+                      <span className="adm-detail-value">{ticket.propietario_telefono || '—'}</span>
+                    </div>
+                    <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
+                      <span className="adm-detail-label">Email</span>
+                      <span className="adm-detail-value">{ticket.propietario_email || '—'}</span>
+                    </div>
                   </div>
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">DNI</span>
-                    <span className="adm-detail-value">{ticket.propietario_dni || '—'}</span>
-                  </div>
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">Email</span>
-                    <span className="adm-detail-value">{ticket.propietario_email || '—'}</span>
-                  </div>
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">Teléfono</span>
-                    <span className="adm-detail-value">{ticket.propietario_telefono || '—'}</span>
+
+                  <div className="adm-detail-grid">
+                    <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
+                      <span className="adm-detail-label">Equipo</span>
+                      <span className="adm-detail-value">
+                        {[ticket.dispositivo_marca, ticket.dispositivo_modelo].filter(Boolean).join(' ') || '—'}
+                      </span>
+                    </div>
+                    <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
+                      <span className="adm-detail-label">Número de serie</span>
+                      <span className="adm-detail-value">{ticket.dispositivo_numeroserie || '—'}</span>
+                    </div>
+                    <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
+                      <span className="adm-detail-label">Técnico asignado</span>
+                      <span className="adm-detail-value">{ticket.usuario || '—'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem' }}>Dispositivo</h3>
-                <div className="adm-detail-grid">
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">Marca</span>
-                    <span className="adm-detail-value">{ticket.dispositivo_marca || '—'}</span>
-                  </div>
-                  <div className="adm-detail-item">
-                    <span className="adm-detail-label">Modelo</span>
-                    <span className="adm-detail-value">{ticket.dispositivo_modelo || '—'}</span>
-                  </div>
-                  <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
-                    <span className="adm-detail-label">Número de serie</span>
-                    <span className="adm-detail-value">{ticket.dispositivo_numeroserie || '—'}</span>
-                  </div>
+              <div className="adm-panel">
+                <h2>Problema reportado</h2>
+                <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.78)', lineHeight: 1.55, margin: 0 }}>
+                  {ticket.descripcionproblema || '—'}
+                </p>
+              </div>
+
+              <div className="adm-panel">
+                <div className="adm-panel-head">
+                  <h2>Checklists en este ticket</h2>
+                  <button type="button" className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => setTab('checklist')}>
+                    Ver todas
+                  </button>
                 </div>
+                {ejecuciones.length === 0 ? (
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', margin: 0 }}>
+                    Todavía no se hizo ninguna checklist en este ticket.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {[...ejecuciones]
+                      .sort((a, b) => new Date(b.fechacreacion) - new Date(a.fechacreacion))
+                      .slice(0, 3)
+                      .map((ej) => (
+                        <div key={ej.ejecucionid} className="tk-checklist-row">
+                          <span className="name">{ej.checklist_nombre || `Checklist #${ej.checklistid}`}</span>
+                          <span className="when">completado {formatRelativo(ej.fechacreacion)}</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="tk-info-col tk-info-col--side">
+              <div className="adm-panel">
+                <h2>Flujo del ticket</h2>
+                <TicketFlowStepper
+                  estados={estados}
+                  historial={ticket.historial_estados || []}
+                  estadoActual={ticket.estado_actual}
+                  onChange={handleStateChange}
+                  disabled={changing || estadosLoading}
+                />
               </div>
             </div>
           </div>
@@ -479,7 +491,6 @@ export default function TicketDetail() {
             </div>
           </div>
         )}
-      </div>
 
       {showAsignar && (
         <AsignarClienteModal

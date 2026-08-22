@@ -57,6 +57,22 @@ export function diasDesde(fechaIso) {
   return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)))
 }
 
+export function formatRelativo(fechaIso) {
+  const dias = diasDesde(fechaIso)
+  if (dias == null) return '—'
+  if (dias === 0) return 'hoy'
+  if (dias === 1) return 'ayer'
+  return `hace ${dias} días`
+}
+
+export function formatDesde(fechaIso) {
+  const dias = diasDesde(fechaIso)
+  if (dias == null) return ''
+  if (dias === 0) return 'Desde hoy'
+  if (dias === 1) return 'Desde ayer'
+  return `Desde hace ${dias} días`
+}
+
 export function tonoAntiguedad(dias) {
   if (dias == null) return 'ok'
   if (dias >= 6) return 'bad'
