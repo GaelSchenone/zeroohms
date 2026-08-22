@@ -14,7 +14,7 @@ from models.presupuesto import Presupuesto
 from models.foto import Foto
 from models.dispositivo import Dispositivo
 from models.propietario import Propietario
-from models.estados import EstadoTK, PosEstadoTK
+from models.estados import EstadoTK, PosEstadoTK, EstadoTarea, EstadoPresupuesto
 from models.ejecucion import Ejecucion, RespuestaIngresada
 from models.checklist import CheckList, Pregunta, Respuesta
 from schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketDetalle
@@ -404,6 +404,25 @@ def delete_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
     ticket = db.query(Ticket).filter(Ticket.tkid == tkid).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
+
+    tarea_ids = [t.tareaid for t in db.query(Tarea).filter(Tarea.tkid == tkid).all()]
+    if tarea_ids:
+        db.query(EstadoTarea).filter(EstadoTarea.tareaid.in_(tarea_ids)).delete(synchronize_session=False)
+    db.query(Tarea).filter(Tarea.tkid == tkid).delete()
+
+    presupuesto_ids = [p.presupuestoid for p in db.query(Presupuesto).filter(Presupuesto.tkid == tkid).all()]
+    if presupuesto_ids:
+        db.query(EstadoPresupuesto).filter(EstadoPresupuesto.presupuestoid.in_(presupuesto_ids)).delete(synchronize_session=False)
+    db.query(Presupuesto).filter(Presupuesto.tkid == tkid).delete()
+
+    ejecucion_ids = [e.ejecucionid for e in db.query(Ejecucion).filter(Ejecucion.tkid == tkid).all()]
+    if ejecucion_ids:
+        db.query(RespuestaIngresada).filter(RespuestaIngresada.ejecucionid.in_(ejecucion_ids)).delete(synchronize_session=False)
+    db.query(Ejecucion).filter(Ejecucion.tkid == tkid).delete()
+
+    db.query(Foto).filter(Foto.tkid == tkid).delete()
+    db.query(EstadoTK).filter(EstadoTK.tkid == tkid).delete()
+
     db.delete(ticket)
     db.commit()
     return {"message": f"Ticket {tkid} eliminado"}

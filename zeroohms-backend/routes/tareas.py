@@ -138,6 +138,7 @@ def delete_tarea(
     tarea = db.query(Tarea).filter(Tarea.tareaid == tareaid).first()
     if not tarea:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    db.query(EstadoTarea).filter(EstadoTarea.tareaid == tareaid).delete()
     db.delete(tarea)
     db.commit()
     return {"message": f"Tarea {tareaid} eliminada"}

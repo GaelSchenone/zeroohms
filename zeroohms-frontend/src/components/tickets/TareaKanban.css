@@ -313,3 +313,114 @@
   color: #fff;
   cursor: pointer;
 }
+
+.tk-bulk-danger{
+  padding: 0.35rem 0.7rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 6px;
+  color: var(--danger-text);
+  cursor: pointer;
+}
+
+.tk-bulk-danger:hover{
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* ---- Kebab menu (acciones de la tarjeta) ---- */
+
+.tk-kebab-wrap{
+  position: relative;
+  margin-left: 0.3rem;
+}
+
+.tk-kebab{
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.tk-card:hover .tk-kebab{
+  opacity: 1;
+}
+
+.tk-kebab:hover{
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.tk-kebab-menu{
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 15;
+  min-width: 130px;
+  background: #161616;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.tk-kebab-menu button{
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tk-kebab-menu button:hover{
+  background: var(--surface-2);
+}
+
+.tk-kebab-menu button.is-danger{
+  color: var(--danger-text);
+}
+
+.tk-kebab-menu button.is-danger:hover{
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* ---- Edición inline (doble click) ---- */
+
+.tk-edit-input{
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: #fff;
+  outline: none;
+}
+
+.tk-edit-date,
+.tk-edit-select{
+  padding: 0.2rem 0.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  color: #fff;
+  outline: none;
+  max-width: 100%;
+}

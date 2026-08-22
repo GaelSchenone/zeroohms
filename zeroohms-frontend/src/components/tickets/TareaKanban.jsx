@@ -78,6 +78,9 @@ export default function TareaKanban({
   const [lastClicked, setLastClicked] = useState(null)
   const [aplicandoBulk, setAplicandoBulk] = useState(false)
 
+  const [menuAbierto, setMenuAbierto] = useState(null)
+  const [editando, setEditando] = useState(null)
+
   const puedeCrear = showCreate && Boolean(tkid)
   const presetRef = useRef(null)
 
@@ -136,11 +139,22 @@ export default function TareaKanban({
       if (e.key === 'Escape') {
         setSelected(new Set())
         setLastClicked(null)
+        setMenuAbierto(null)
+        setEditando(null)
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
+
+  useEffect(() => {
+    if (menuAbierto == null) return
+    const onClickOutside = (e) => {
+      if (!e.target.closest('.tk-kebab-wrap')) setMenuAbierto(null)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [menuAbierto])
 
   const flatOrder = columnas.flatMap((col) => tareas.filter((t) => t.estado_actual === col.nombre))
 
@@ -173,6 +187,36 @@ export default function TareaKanban({
       })
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  const guardarCampo = async (tareaid, campo, valor) => {
+    const anterior = tareas
+    setTareas((ts) => ts.map((t) => (t.tareaid === tareaid ? { ...t, [campo]: valor } : t)))
+    setEditando(null)
+    try {
+      await api(`/tareas/${tareaid}`, { method: 'PUT', body: { [campo]: valor } })
+    } catch (err) {
+      setTareas(anterior)
+      setError(err.message)
+    }
+  }
+
+  const eliminarVarias = async () => {
+    if (selected.size === 0) return
+    if (!window.confirm(`¿Eliminar ${selected.size} tarea${selected.size === 1 ? '' : 's'}? Esta acción no se puede deshacer.`)) return
+    const ids = [...selected]
+    setAplicandoBulk(true)
+    setError(null)
+    try {
+      await Promise.all(ids.map((tareaid) => api(`/tareas/${tareaid}`, { method: 'DELETE' })))
+      setTareas((prev) => prev.filter((t) => !ids.includes(t.tareaid)))
+      setSelected(new Set())
+    } catch (err) {
+      setError(err.message)
+      fetchTareas()
+    } finally {
+      setAplicandoBulk(false)
     }
   }
 
@@ -381,6 +425,10 @@ export default function TareaKanban({
               <option key={col.id} value={col.id}>{col.titulo}</option>
             ))}
           </select>
+          <span className="tk-bulk-sep" />
+          <button type="button" className="tk-bulk-danger" onClick={eliminarVarias} disabled={aplicandoBulk}>
+            Eliminar seleccionadas
+          </button>
         </div>
       )}
 
@@ -455,33 +503,104 @@ export default function TareaKanban({
                           <span className="tk-drag" aria-hidden="true">
                             <span /><span /><span /><span /><span /><span />
                           </span>
+                          {showDelete && (
+                            <div className="tk-kebab-wrap">
+                              <button
+                                type="button"
+                                className="tk-kebab"
+                                aria-label="Más acciones"
+                                onClick={(e) => { e.stopPropagation(); setMenuAbierto((m) => (m === t.tareaid ? null : t.tareaid)) }}
+                              >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="12" cy="19" r="2.2" /></svg>
+                              </button>
+                              {menuAbierto === t.tareaid && (
+                                <div className="tk-kebab-menu">
+                                  <button
+                                    type="button"
+                                    className="is-danger"
+                                    onClick={(e) => { e.stopPropagation(); setMenuAbierto(null); eliminarTarea(t.tareaid) }}
+                                  >
+                                    Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <p className="adm-kanban-desc">{t.descripcion}</p>
+
+                        {editando?.tareaid === t.tareaid && editando.campo === 'descripcion' ? (
+                          <input
+                            className="tk-edit-input"
+                            autoFocus
+                            defaultValue={t.descripcion}
+                            onClick={(e) => e.stopPropagation()}
+                            onBlur={(e) => guardarCampo(t.tareaid, 'descripcion', e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') e.target.blur()
+                              if (e.key === 'Escape') setEditando(null)
+                            }}
+                          />
+                        ) : (
+                          <p
+                            className="adm-kanban-desc"
+                            onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'descripcion' }) }}
+                          >
+                            {t.descripcion}
+                          </p>
+                        )}
+
                         <div className="tk-meta">
-                          <span className={`tk-due${vencida ? ' tk-due--overdue' : ''}`}>
-                            {t.fechalimite
-                              ? new Date(t.fechalimite).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
-                              : 'Sin fecha'}
-                          </span>
-                          {t.usuario ? (
-                            <span className="tk-who">
+                          {editando?.tareaid === t.tareaid && editando.campo === 'fechalimite' ? (
+                            <input
+                              type="date"
+                              className="tk-edit-date"
+                              autoFocus
+                              defaultValue={t.fechalimite || ''}
+                              onClick={(e) => e.stopPropagation()}
+                              onBlur={() => setEditando(null)}
+                              onChange={(e) => guardarCampo(t.tareaid, 'fechalimite', e.target.value || null)}
+                            />
+                          ) : (
+                            <span
+                              className={`tk-due${vencida ? ' tk-due--overdue' : ''}`}
+                              onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'fechalimite' }) }}
+                            >
+                              {t.fechalimite
+                                ? new Date(t.fechalimite).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
+                                : 'Sin fecha'}
+                            </span>
+                          )}
+
+                          {editando?.tareaid === t.tareaid && editando.campo === 'usuario' ? (
+                            <select
+                              className="tk-edit-select"
+                              autoFocus
+                              defaultValue={t.usuario || ''}
+                              onClick={(e) => e.stopPropagation()}
+                              onBlur={() => setEditando(null)}
+                              onChange={(e) => guardarCampo(t.tareaid, 'usuario', e.target.value || null)}
+                            >
+                              <option value="">Sin asignar</option>
+                              {usuarios.map((u) => (
+                                <option key={u.usuario} value={u.usuario}>{u.usuario}</option>
+                              ))}
+                            </select>
+                          ) : t.usuario ? (
+                            <span
+                              className="tk-who"
+                              onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'usuario' }) }}
+                            >
                               <span className="tk-who-avatar">{iniciales(t.usuario)}</span>
                             </span>
                           ) : (
-                            <span className="tk-who-empty">Sin asignar</span>
+                            <span
+                              className="tk-who-empty"
+                              onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'usuario' }) }}
+                            >
+                              Sin asignar
+                            </span>
                           )}
                         </div>
-                        {showDelete && (
-                          <div className="adm-kanban-actions">
-                            <button
-                              type="button"
-                              className="adm-btn adm-btn--ghost"
-                              onClick={(e) => { e.stopPropagation(); eliminarTarea(t.tareaid) }}
-                            >
-                              Eliminar
-                            </button>
-                          </div>
-                        )}
                       </article>
                     )
                   })}
