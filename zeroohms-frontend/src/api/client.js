@@ -30,13 +30,22 @@ export async function api(path, options = {}) {
     body: body ? JSON.stringify(body) : undefined,
   })
 
-  if (res.status === 401) {
+  if (res.status === 401 && !path.includes('/auth/login')) {
     clearToken()
     window.location.href = '/login'
     throw new Error('Sesión expirada')
   }
 
-  const data = await res.json()
+  const text = await res.text()
+  let data
+  try {
+    data = JSON.parse(text)
+  } catch {
+    if (!res.ok) {
+      throw new Error(text || 'Error del servidor')
+    }
+    throw new Error('Respuesta inesperada del servidor')
+  }
 
   if (!res.ok) {
     throw new Error(data.detail || data.error || 'Error del servidor')

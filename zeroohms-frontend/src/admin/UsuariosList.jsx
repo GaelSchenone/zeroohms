@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api/client.js'
-import { Plus, SettingsCog } from 'pixelarticons/react'
+import { Plus, SettingsCog2 } from 'pixelarticons/react'
 import UsuariosForm from './UsuariosForm.jsx'
 
 export default function UsuariosList() {
@@ -94,7 +94,7 @@ export default function UsuariosList() {
                         style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
                         onClick={() => handleEdit(u)}
                       >
-                        <SettingsCog size={14} />
+                        <SettingsCog2 size={14} />
                       </button>
                       <button
                         className="adm-btn adm-btn--ghost"
