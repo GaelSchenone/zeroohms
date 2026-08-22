@@ -351,9 +351,9 @@ export default function TicketDetail() {
                     <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', margin: 0 }}>{checklistSeleccionada.descripcion}</p>
                   )}
 
-                  {preguntas.map((p) => (
-                    <div key={p.preguntaid} className="adm-field">
-                      <label>{p.pregunta}</label>
+                  {preguntas.map((p, idx) => (
+                    <div key={p.preguntaid} className="chk-question">
+                      <label><span className="chk-num">{idx + 1}</span>{p.pregunta}</label>
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {p.respuestas_validas.map((r) => (
                           <button
