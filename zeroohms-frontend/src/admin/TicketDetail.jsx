@@ -5,6 +5,7 @@ import { estadoClass, formatEstado } from '../utils/format.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
 import EstadoButtonRow from '../components/tickets/EstadoButtonRow.jsx'
 import TicketTimeline from '../components/tickets/TicketTimeline.jsx'
+import AsignarClienteModal from '../components/tickets/AsignarClienteModal.jsx'
 
 const TABS = ['info', 'tareas', 'checklist']
 
@@ -15,6 +16,7 @@ export default function TicketDetail() {
   const [loading, setLoading] = useState(true)
   const [changing, setChanging] = useState(false)
   const [tab, setTab] = useState('info')
+  const [showAsignar, setShowAsignar] = useState(false)
 
   const [estados, setEstados] = useState([])
   const [estadosLoading, setEstadosLoading] = useState(true)
@@ -262,7 +264,12 @@ export default function TicketDetail() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div>
-                <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem' }}>Cliente</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', margin: 0 }}>Cliente y equipo</h3>
+                  <button type="button" className="adm-btn adm-btn--subtle adm-btn--sm" onClick={() => setShowAsignar(true)}>
+                    Cambiar cliente
+                  </button>
+                </div>
                 <div className="adm-detail-grid">
                   <div className="adm-detail-item">
                     <span className="adm-detail-label">Nombre</span>
@@ -440,6 +447,18 @@ export default function TicketDetail() {
           </div>
         )}
       </div>
+
+      {showAsignar && (
+        <AsignarClienteModal
+          tkid={id}
+          ticketActual={ticket}
+          onClose={() => setShowAsignar(false)}
+          onAsignado={() => {
+            setShowAsignar(false)
+            fetchTicket()
+          }}
+        />
+      )}
     </div>
   )
 }
