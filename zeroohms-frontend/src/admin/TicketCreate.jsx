@@ -2,6 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 
+const CHIPS_ACCESORIOS = [
+  'Cargador / fuente',
+  'Cables (HDMI, USB, poder)',
+  'Funda / bolso / caja',
+  'Periféricos (mouse, teclado, mando)',
+  'Repuesto traído por el cliente',
+]
+
 const inputMini = {
   padding: '0.5rem 0.75rem',
   fontSize: '0.85rem',
@@ -23,6 +31,9 @@ export default function TicketCreate() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [nuevoCliente, setNuevoCliente] = useState({ nombre: '', apellido: '', telefono: '', email: '' })
+  const [accesoriosSel, setAccesoriosSel] = useState([])
+  const [accesorioOtro, setAccesorioOtro] = useState('')
+  const [accesoriosAviso, setAccesoriosAviso] = useState('')
   const [creado, setCreado] = useState(null)
   const [copiado, setCopiado] = useState(false)
   const dropdownRef = useRef(null)
@@ -71,10 +82,15 @@ export default function TicketCreate() {
     }
   }
 
+  const toggleAccesorio = (nombre) => {
+    setAccesoriosSel((prev) => (prev.includes(nombre) ? prev.filter((n) => n !== nombre) : [...prev, nombre]))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
     setError('')
+    setAccesoriosAviso('')
     try {
       let dni
       if (clienteSeleccionado) {
@@ -115,6 +131,18 @@ export default function TicketCreate() {
         },
       })
       setCreado(ticket)
+
+      const nombresAccesorios = [...accesoriosSel]
+      if (accesorioOtro.trim()) nombresAccesorios.push(accesorioOtro.trim())
+      if (nombresAccesorios.length > 0) {
+        const resultados = await Promise.allSettled(
+          nombresAccesorios.map((nombre) => api('/accesorios', { method: 'POST', body: { tkid: ticket.tkid, nombre } })),
+        )
+        const fallidos = resultados.filter((r) => r.status === 'rejected').length
+        if (fallidos > 0) {
+          setAccesoriosAviso(`El ticket se creó, pero no se pudieron guardar ${fallidos} accesorio(s).`)
+        }
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -144,6 +172,9 @@ export default function TicketCreate() {
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
             Compartí este código con el cliente para que siga su reparación desde la página pública.
           </p>
+          {accesoriosAviso && (
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#f5c46a' }}>{accesoriosAviso}</p>
+          )}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <a className="adm-btn adm-btn--primary" href={`/tracking?c=${creado.codigoseguimiento}`} target="_blank" rel="noreferrer">
               Seguir reparación
@@ -263,6 +294,33 @@ export default function TicketCreate() {
           <div className="adm-field">
             <label>Número de serie</label>
             <input type="text" value={dispositivo.numeroserie} onChange={(e) => setDispositivo({ ...dispositivo, numeroserie: e.target.value })} placeholder="Opcional" />
+          </div>
+        </fieldset>
+
+        <fieldset style={{ border: 'none', padding: 0, display: 'contents' }}>
+          <legend style={{ fontWeight: 600, fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Accesorios que entregó el cliente
+          </legend>
+          <div className="adm-field">
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {CHIPS_ACCESORIOS.map((nombre) => (
+                <button
+                  key={nombre}
+                  type="button"
+                  className={`adm-filter${accesoriosSel.includes(nombre) ? ' is-active' : ''}`}
+                  onClick={() => toggleAccesorio(nombre)}
+                >
+                  {nombre}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={accesorioOtro}
+              onChange={(e) => setAccesorioOtro(e.target.value)}
+              placeholder="Otro (opcional)"
+              style={{ marginTop: '0.5rem' }}
+            />
           </div>
         </fieldset>
 
