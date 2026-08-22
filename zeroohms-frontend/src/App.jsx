@@ -19,6 +19,7 @@ import ChecklistRun from './admin/ChecklistRun.jsx'
 import UsuariosList from './admin/UsuariosList.jsx'
 import Ajustes from './admin/Ajustes.jsx'
 import TrackingPage from './pages/TrackingPage.jsx'
+import SubirFotosPage from './pages/SubirFotosPage.jsx'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/tracking" element={<TrackingPage />} />
+        <Route path="/subir-fotos" element={<SubirFotosPage />} />
 
         <Route
           path="/admin"

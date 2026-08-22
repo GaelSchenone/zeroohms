@@ -1,0 +1,174 @@
+.sfp-page{
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background: #050505;
+  color: #fff;
+}
+
+.sfp-card{
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sfp-logo{
+  width: 130px;
+}
+
+.sfp-title{
+  font-family: 'NType82', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-align: center;
+  margin: 0;
+}
+
+.sfp-subtitle{
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  margin: 0;
+}
+
+.sfp-loading{
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sfp-error{
+  font-size: 0.95rem;
+  color: #f87171;
+  text-align: center;
+  padding: 0.6rem 0.8rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+.sfp-hint{
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  margin: 0;
+}
+
+.sfp-actions{
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.sfp-btn{
+  flex: 1;
+  padding: 0.85rem 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.sfp-btn--primary{
+  background: #F0513B;
+  border-color: #F0513B;
+}
+
+.sfp-btn--primary:hover{
+  filter: brightness(1.1);
+}
+
+.sfp-btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sfp-btn--subir{
+  width: 100%;
+}
+
+.sfp-cola{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.sfp-item{
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sfp-item img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sfp-item-overlay{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sfp-item-progress{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(240, 81, 59, 0.65);
+  transition: height 0.15s;
+}
+
+.sfp-item-check{
+  background: rgba(34, 197, 94, 0.85);
+  color: #fff;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sfp-item-err{
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sfp-item-remove{
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: none;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
