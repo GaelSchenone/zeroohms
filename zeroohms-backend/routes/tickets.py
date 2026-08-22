@@ -313,6 +313,14 @@ def recibo_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
     dispositivo = ticket.dispositivo
     propietario = dispositivo.propietario if dispositivo else None
 
+    accesorios_nombres = [
+        a.nombre for a in db.query(Accesorio).filter(Accesorio.tkid == tkid).all() if a.nombre
+    ]
+    presupuestos_dump = [
+        _armar_response_presupuesto(db, p).model_dump()
+        for p in sorted(ticket.presupuestos, key=lambda p: p.fechacreacion or datetime.min)
+    ]
+
     pdf = generar_recibo_ingreso(
         {
             "tkid": ticket.tkid,
@@ -331,6 +339,8 @@ def recibo_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
             "modelo": dispositivo.modelo if dispositivo else None,
             "numeroserie": dispositivo.numeroserie if dispositivo else None,
         },
+        accesorios_nombres,
+        presupuestos_dump,
     )
     nombre_archivo = f"recibo-{ticket.codigoseguimiento or ticket.tkid}.pdf"
     return Response(

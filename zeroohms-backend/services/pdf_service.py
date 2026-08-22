@@ -73,6 +73,53 @@ def _wrap(c, texto, x, y, max_chars, line_height, font="Helvetica", size=9):
     return y
 
 
+def _cant(value) -> str:
+    v = float(value)
+    if v == int(v):
+        return str(int(v))
+    return f"{v:.2f}".rstrip("0").rstrip(".")
+
+
+def _bloque_lista(c, x, y, ancho, etiqueta, lineas, alto_por_linea=11):
+    """Caja con franja de etiqueta arriba y una lista de líneas abajo.
+    Cada línea es (texto, valor_derecha_o_None, negrita, italica)."""
+    n = max(len(lineas), 1)
+    alto = 11 + 4 + n * alto_por_linea + 3
+
+    c.setStrokeColor(black)
+    c.setLineWidth(0.6)
+    c.rect(x, y - alto, ancho, alto, stroke=1, fill=0)
+
+    c.setFillColor(GRIS_CELDA)
+    c.rect(x, y - 11, ancho, 11, stroke=0, fill=1)
+    c.setStrokeColor(black)
+    c.line(x, y - 11, x + ancho, y - 11)
+
+    c.setFillColor(black)
+    c.setFont("Helvetica-Bold", 6.2)
+    c.drawString(x + 5, y - 8, etiqueta.upper())
+
+    cy = y - 11 - alto_por_linea + 3
+    for texto, derecha, negrita, italica in lineas:
+        if italica:
+            c.setFont("Helvetica-Oblique", 8.5)
+            c.setFillColor(GRIS_CLARO)
+        else:
+            c.setFont("Helvetica-Bold" if negrita else "Helvetica", 8.5)
+        c.drawString(x + 5, cy, texto)
+        if derecha:
+            c.drawRightString(x + ancho - 5, cy, derecha)
+        c.setFillColor(black)
+        cy -= alto_por_linea
+
+    return y - alto
+
+
+def _altura_bloque_lista(n_lineas, alto_por_linea=11) -> float:
+    n = max(n_lineas, 1)
+    return 11 + 4 + n * alto_por_linea + 3
+
+
 def _fila_grid(c, x, y, ancho, alto_fila, celdas):
     """Dibuja una fila de celdas tipo formulario: borde, franja de etiqueta gris arriba y valor abajo.
     celdas: lista de (etiqueta, valor, fraccion_de_ancho)."""
@@ -97,7 +144,7 @@ def _fila_grid(c, x, y, ancho, alto_fila, celdas):
     return y - alto_fila
 
 
-def _talon(c, y0, alto, ticket, propietario, dispositivo, etiqueta_copia, es_cliente):
+def _talon(c, y0, alto, ticket, propietario, dispositivo, etiqueta_copia, es_cliente, accesorios=None, items_presupuesto=None, monto_presupuesto=0):
     x = MARGEN
     ancho_util = PAGE_W - 2 * MARGEN
     y = y0 + alto - 22
@@ -171,6 +218,24 @@ def _talon(c, y0, alto, ticket, propietario, dispositivo, etiqueta_copia, es_cli
     _wrap(c, ticket.get("descripcionproblema"), x + 6, y - 21, 100, 10, size=8.5)
     y -= alto_problema
 
+    if accesorios:
+        y = _bloque_lista(c, x, y, ancho_util, "Accesorios entregados", [(", ".join(accesorios), None, False, False)])
+
+    if items_presupuesto:
+        lineas = [
+            (
+                f"{it['descripcion']} ({_cant(it['cantidad'])} x {_money(it['preciounitario'])})",
+                _money(float(it["cantidad"]) * float(it["preciounitario"])),
+                False,
+                False,
+            )
+            for it in items_presupuesto
+        ]
+        lineas.append(("TOTAL", _money(monto_presupuesto), True, False))
+        y = _bloque_lista(c, x, y, ancho_util, "Presupuesto", lineas)
+    else:
+        y = _bloque_lista(c, x, y, ancho_util, "Presupuesto", [("Pendiente de diagnóstico", None, False, True)])
+
     # Marco exterior que enmarca toda la grilla, como un comprobante.
     c.setLineWidth(1.1)
     c.rect(x, y, ancho_util, marco_top - y, stroke=1, fill=0)
@@ -189,23 +254,61 @@ def _talon(c, y0, alto, ticket, propietario, dispositivo, etiqueta_copia, es_cli
     c.setFillColor(black)
 
 
-def generar_recibo_ingreso(ticket: dict, propietario: dict, dispositivo: dict) -> bytes:
+# Alto libre estimado en el talón dentro del formato actual de 2 talones por hoja
+# (talón ~421pt, contenido fijo ~293pt) — si los bloques nuevos no entran ahí, se
+# pasa a 2 hojas completas (una por talón) en vez de recortar contenido.
+MARGEN_LIBRE_TALON = 128
+
+
+def _altura_extra_talon(accesorios, items_presupuesto) -> float:
+    extra = 0.0
+    if accesorios:
+        extra += _altura_bloque_lista(1)
+    n_lineas_presupuesto = len(items_presupuesto) + 1 if items_presupuesto else 1
+    extra += _altura_bloque_lista(n_lineas_presupuesto)
+    return extra
+
+
+def generar_recibo_ingreso(ticket: dict, propietario: dict, dispositivo: dict, accesorios: list | None = None, presupuestos: list | None = None) -> bytes:
+    accesorios = accesorios or []
+    presupuesto_actual = presupuestos[-1] if presupuestos else None
+    items_presupuesto = (presupuesto_actual or {}).get("items") or []
+    monto_presupuesto = (presupuesto_actual or {}).get("monto") or 0
+
+    extra = _altura_extra_talon(accesorios, items_presupuesto)
+
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=A4)
 
-    mitad = PAGE_H / 2
-    _talon(c, mitad, mitad, ticket, propietario, dispositivo, "COPIA CLIENTE", es_cliente=True)
-    _talon(c, 0, mitad, ticket, propietario, dispositivo, "COPIA TALLER", es_cliente=False)
+    if extra <= MARGEN_LIBRE_TALON:
+        mitad = PAGE_H / 2
+        _talon(c, mitad, mitad, ticket, propietario, dispositivo, "COPIA CLIENTE", True, accesorios, items_presupuesto, monto_presupuesto)
+        _talon(c, 0, mitad, ticket, propietario, dispositivo, "COPIA TALLER", False, accesorios, items_presupuesto, monto_presupuesto)
 
-    c.setDash(3, 3)
-    c.setStrokeColor(GRIS_CLARO)
-    c.line(MARGEN, mitad, PAGE_W - MARGEN, mitad)
-    c.setDash()
+        c.setDash(3, 3)
+        c.setStrokeColor(GRIS_CLARO)
+        c.line(MARGEN, mitad, PAGE_W - MARGEN, mitad)
+        c.setDash()
+    else:
+        alto_pagina = PAGE_H - 2 * MARGEN
+        _talon(c, MARGEN, alto_pagina, ticket, propietario, dispositivo, "COPIA CLIENTE", True, accesorios, items_presupuesto, monto_presupuesto)
+        c.showPage()
+        _talon(c, MARGEN, alto_pagina, ticket, propietario, dispositivo, "COPIA TALLER", False, accesorios, items_presupuesto, monto_presupuesto)
 
     c.setTitle(f"Recibo de ingreso — {ticket.get('codigoseguimiento') or ticket.get('tkid')}")
     c.showPage()
     c.save()
     return buf.getvalue()
+
+
+def _asegurar_espacio(c, y, minimo=70) -> float:
+    """Si queda poco espacio antes del margen inferior, arranca una hoja nueva."""
+    if y < minimo:
+        c.showPage()
+        c.setFillColor(black)
+        c.setStrokeColor(black)
+        return PAGE_H - MARGEN
+    return y
 
 
 def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, ejecuciones: list, presupuestos: list) -> bytes:
@@ -271,6 +374,7 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
         y -= 18
     else:
         for ej in ejecuciones:
+            y = _asegurar_espacio(c, y, minimo=80)
             c.setFont("Helvetica-Bold", 10)
             c.drawString(x, y, ej.get("checklist_nombre") or "Checklist")
             c.setFont("Helvetica", 8)
@@ -279,6 +383,7 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
             c.setFillColor(black)
             y -= 14
             for r in ej.get("respuestas", []):
+                y = _asegurar_espacio(c, y, minimo=40)
                 c.setFont("Helvetica", 9)
                 linea = f"• {r.get('pregunta_texto') or ''}: {r.get('respuesta_texto') or '—'}"
                 c.drawString(x + 6, y, linea)
@@ -290,6 +395,7 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
                     c.setFillColor(black)
             y -= 10
 
+    y = _asegurar_espacio(c, y, minimo=90)
     y -= 6
     c.setFont("Helvetica-Bold", 12)
     c.drawString(x, y, "Presupuesto")
@@ -306,6 +412,7 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
         y -= 18
     else:
         for p in presupuestos:
+            y = _asegurar_espacio(c, y, minimo=70)
             c.setFont("Helvetica-Bold", 11)
             c.setFillColor(ACCENT)
             c.drawString(x, y, _money(p.get("monto")))
@@ -320,7 +427,26 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
                 c.drawString(x, y, f"Válido hasta: {_fecha(p['fechavalidez'])}")
                 c.setFillColor(black)
                 y -= 14
-            y -= 6
+
+            items = p.get("items") or []
+            if not items:
+                c.setFont("Helvetica-Oblique", 8.5)
+                c.setFillColor(GRIS_CLARO)
+                c.drawString(x + 6, y, "Sin ítems cargados todavía.")
+                c.setFillColor(black)
+                y -= 14
+            else:
+                for it in items:
+                    y = _asegurar_espacio(c, y, minimo=40)
+                    c.setFont("Helvetica", 8.5)
+                    subtotal = float(it["cantidad"]) * float(it["preciounitario"])
+                    c.drawString(
+                        x + 6, y,
+                        f"• {it['descripcion']}  ({_cant(it['cantidad'])} x {_money(it['preciounitario'])})",
+                    )
+                    c.drawRightString(x + ancho_util, y, _money(subtotal))
+                    y -= 12
+            y -= 8
 
     c.setFont("Helvetica", 7)
     c.setFillColor(GRIS_CLARO)
