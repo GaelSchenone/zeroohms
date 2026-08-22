@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../api/client.js'
 import { Plus } from 'pixelarticons/react'
+import { iniciales } from '../../utils/format.js'
 import './TareaKanban.css'
 
 const COLUMNAS = [
-  { id: 1, titulo: 'Pendiente', nombre: 'pendiente' },
-  { id: 2, titulo: 'En progreso', nombre: 'en progreso' },
-  { id: 3, titulo: 'Completada', nombre: 'completada' },
+  { id: 1, titulo: 'Pendiente', nombre: 'pendiente', tono: 'blue', permiteAgregar: true },
+  { id: 2, titulo: 'En progreso', nombre: 'en progreso', tono: 'amber', permiteAgregar: false },
+  { id: 3, titulo: 'Completada', nombre: 'completada', tono: 'green', permiteAgregar: false },
 ]
+
+function estaVencida(tarea) {
+  if (!tarea.fechalimite || tarea.estado_actual === 'completada') return false
+  return new Date(tarea.fechalimite) < new Date(new Date().toDateString())
+}
 const PRIORIDADES = ['baja', 'media', 'alta']
 const FORM_VACIO = { descripcion: '', prioridad: 'media', usuario: '', fechalimite: '' }
 
@@ -206,50 +212,67 @@ export default function TareaKanban({
                 onDragLeave={() => overCol === col.id && setOverCol(null)}
               >
                 <header className="adm-kanban-header">
-                  <span>{col.titulo}</span>
+                  <span className="tk-col-title">
+                    <span className="tk-col-dot" data-tone={col.tono} />
+                    {col.titulo}
+                  </span>
                   <span className="adm-kanban-count">{deColumna.length}</span>
                 </header>
                 <div className="adm-kanban-cards">
                   {deColumna.length === 0 && <div className="adm-kanban-empty">Sin tareas</div>}
-                  {deColumna.map((t) => (
-                    <article
-                      key={t.tareaid}
-                      className={`adm-kanban-card tk-card${dragId === t.tareaid ? ' tk-card--dragging' : ''}`}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, t.tareaid)}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <div className="adm-kanban-card-head">
-                        <span className="adm-kanban-id">#{t.tareaid}</span>
-                        <span className={`adm-kanban-priority tk-prioridad--${t.prioridad}`}>
-                          {t.prioridad}
-                        </span>
-                      </div>
-                      <p className="adm-kanban-desc">{t.descripcion}</p>
-                      {(t.usuario || t.fechalimite) && (
+                  {deColumna.map((t) => {
+                    const vencida = estaVencida(t)
+                    return (
+                      <article
+                        key={t.tareaid}
+                        className={`adm-kanban-card tk-card${dragId === t.tareaid ? ' tk-card--dragging' : ''}${col.nombre === 'completada' ? ' tk-card--completa' : ''}`}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, t.tareaid)}
+                        onDragEnd={handleDragEnd}
+                      >
+                        <div className="adm-kanban-card-head">
+                          <span className={`adm-kanban-priority tk-prioridad--${t.prioridad}`}>
+                            {t.prioridad}
+                          </span>
+                          <span className="tk-drag" aria-hidden="true">
+                            <span /><span /><span /><span /><span /><span />
+                          </span>
+                        </div>
+                        <p className="adm-kanban-desc">{t.descripcion}</p>
                         <div className="tk-meta">
-                          {t.usuario && <span className="adm-kanban-user">{t.usuario}</span>}
-                          {t.fechalimite && (
-                            <span className="tk-limite">
-                              {new Date(t.fechalimite).toLocaleDateString('es-AR')}
+                          <span className={`tk-due${vencida ? ' tk-due--overdue' : ''}`}>
+                            {t.fechalimite
+                              ? new Date(t.fechalimite).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
+                              : 'Sin fecha'}
+                          </span>
+                          {t.usuario ? (
+                            <span className="tk-who">
+                              <span className="tk-who-avatar">{iniciales(t.usuario)}</span>
                             </span>
+                          ) : (
+                            <span className="tk-who-empty">Sin asignar</span>
                           )}
                         </div>
-                      )}
-                      {showDelete && (
-                        <div className="adm-kanban-actions">
-                          <button
-                            type="button"
-                            className="adm-btn adm-btn--ghost"
-                            onClick={() => eliminarTarea(t.tareaid)}
-                          >
-                            Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </article>
-                  ))}
+                        {showDelete && (
+                          <div className="adm-kanban-actions">
+                            <button
+                              type="button"
+                              className="adm-btn adm-btn--ghost"
+                              onClick={() => eliminarTarea(t.tareaid)}
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
+                      </article>
+                    )
+                  })}
                 </div>
+                {puedeCrear && col.permiteAgregar && (
+                  <button type="button" className="tk-add-row" onClick={() => setShowForm(true)}>
+                    <Plus size={14} aria-hidden="true" /> Nueva tarea
+                  </button>
+                )}
               </section>
             )
           })}

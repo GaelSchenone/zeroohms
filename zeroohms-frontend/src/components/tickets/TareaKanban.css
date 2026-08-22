@@ -72,3 +72,100 @@
 .tk-form input[required]{
   flex: 1 1 220px;
 }
+
+/* ---- Notion-style board polish ---- */
+
+.tk-col-title{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tk-col-dot{
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tk-col-dot[data-tone="blue"]{ background: #7ab0ff; }
+.tk-col-dot[data-tone="amber"]{ background: var(--warning); }
+.tk-col-dot[data-tone="green"]{ background: var(--success-text); }
+
+.tk-drag{
+  margin-left: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  grid-template-rows: repeat(3, 3px);
+  gap: 2px;
+  opacity: 0.3;
+}
+
+.tk-drag span{
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tk-card--completa .adm-kanban-desc{
+  text-decoration: line-through;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.tk-card--completa{
+  opacity: 0.75;
+}
+
+.tk-due{
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.tk-due--overdue{
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.tk-who-avatar{
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.tk-who-empty{
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+.tk-add-row{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.tk-add-row:hover{
+  color: var(--accent);
+  border-color: rgba(240, 81, 59, 0.4);
+  background: var(--accent-soft);
+}

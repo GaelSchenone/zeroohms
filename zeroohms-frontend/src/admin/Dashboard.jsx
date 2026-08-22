@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
-import { formatEstado, estadoClass, formatMoney, diasDesde, tonoAntiguedad } from '../utils/format.js'
+import { formatEstado, estadoClass, formatMoney, diasDesde, tonoAntiguedad, iniciales } from '../utils/format.js'
 import {
   Plus, Inbox, Cpu, Clock, CheckDouble, Users, SquareAlert, Wallet,
   ClipboardNote, Settings2, ChartBarBig, ArrowRight, Human,
@@ -9,16 +9,6 @@ import {
 
 const ESTADOS_TERMINALES = ['entregado', 'cancelado']
 const UMBRAL_ESTANCADO = 6
-
-function iniciales(nombre) {
-  if (!nombre) return '—'
-  return nombre
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join('')
-}
 
 const DONUT_STAGES = [
   { key: 'ticket_creado', label: 'Creados', color: '#7ab0ff' },

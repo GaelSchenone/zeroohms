@@ -32,6 +32,16 @@ export function estadoClass(estado) {
   return estado.toLowerCase().replace(/[ _]/g, '-')
 }
 
+export function iniciales(nombre) {
+  if (!nombre) return '—'
+  return nombre
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('')
+}
+
 export function formatMoney(value) {
   if (value == null || Number.isNaN(value)) return '—'
   return new Intl.NumberFormat('es-AR', {
