@@ -22,6 +22,7 @@ class TicketResponse(BaseModel):
     descripcionproblema: str | None = None
     fechacreacion: datetime | None = None
     estado_actual: str | None = None
+    fecha_ultimo_cambio: datetime | None = None
 
     class Config:
         from_attributes = True

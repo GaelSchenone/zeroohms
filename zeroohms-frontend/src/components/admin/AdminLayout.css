@@ -20,6 +20,7 @@
   --info: #7ab0ff;
   --info-soft: rgba(59, 130, 246, 0.14);
   --danger-text: #f87171;
+  --danger-soft: rgba(239, 68, 68, 0.14);
   --radius: 10px;
   --radius-sm: 8px;
   --radius-lg: 16px;
@@ -1492,4 +1493,120 @@
   .adm-quick-grid{
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* ---- Row labels (Operación de hoy / Negocio del mes) ---- */
+
+.adm-row-label{
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-top: -0.4rem;
+}
+
+.adm-row-label-line{
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---- Antigüedad (SLA) ---- */
+
+.adm-age{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.adm-age-dot{
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.adm-age--ok{ color: var(--text-secondary); }
+.adm-age-dot--ok{ background: var(--success-text); }
+
+.adm-age--warn{ color: var(--warning); }
+.adm-age-dot--warn{ background: var(--warning); }
+
+.adm-age--bad{ color: var(--danger-text); font-weight: 600; }
+.adm-age-dot--bad{ background: var(--danger-text); }
+
+.adm-attention-item--hot{
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.adm-attention-icon--hot{
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+/* ---- Carga de trabajo por técnico ---- */
+
+.adm-workload{
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.adm-workload-row{
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.adm-workload-avatar{
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.adm-workload-name{
+  width: 96px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm-workload-track{
+  flex: 1;
+  height: 7px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.adm-workload-fill{
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+}
+
+.adm-workload-count{
+  width: 68px;
+  text-align: right;
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
 }

@@ -32,6 +32,28 @@ export function estadoClass(estado) {
   return estado.toLowerCase().replace(/[ _]/g, '-')
 }
 
+export function formatMoney(value) {
+  if (value == null || Number.isNaN(value)) return '—'
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+export function diasDesde(fechaIso) {
+  if (!fechaIso) return null
+  const ms = Date.now() - new Date(fechaIso).getTime()
+  return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)))
+}
+
+export function tonoAntiguedad(dias) {
+  if (dias == null) return 'ok'
+  if (dias >= 6) return 'bad'
+  if (dias >= 3) return 'warn'
+  return 'ok'
+}
+
 export function formatDateTime(value) {
   if (!value) return '—'
   const d = new Date(value)

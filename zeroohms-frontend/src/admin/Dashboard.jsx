@@ -1,11 +1,24 @@
 import { useState, useEffect } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
-import { formatEstado, estadoClass } from '../utils/format.js'
+import { formatEstado, estadoClass, formatMoney, diasDesde, tonoAntiguedad } from '../utils/format.js'
 import {
   Plus, Inbox, Cpu, Clock, CheckDouble, Users, SquareAlert, Wallet,
-  ClipboardNote, Settings2, ChartBarBig, ArrowRight,
+  ClipboardNote, Settings2, ChartBarBig, ArrowRight, Human,
 } from 'pixelarticons/react'
+
+const ESTADOS_TERMINALES = ['entregado', 'cancelado']
+const UMBRAL_ESTANCADO = 6
+
+function iniciales(nombre) {
+  if (!nombre) return '—'
+  return nombre
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('')
+}
 
 const DONUT_STAGES = [
   { key: 'ticket_creado', label: 'Creados', color: '#7ab0ff' },
@@ -96,6 +109,44 @@ export default function Dashboard() {
     .sort((a, b) => new Date(b.fechacreacion) - new Date(a.fechacreacion))
     .slice(0, 6)
 
+  const inicioMes = new Date()
+  inicioMes.setDate(1)
+  inicioMes.setHours(0, 0, 0, 0)
+
+  const presupuestosAprobadosMes = presupuestos.filter(
+    (p) => p.estado_actual === 'aprobado' && p.fechacreacion && new Date(p.fechacreacion) >= inicioMes,
+  )
+  const facturacionMes = presupuestosAprobadosMes.reduce((sum, p) => sum + (p.monto || 0), 0)
+  const ticketPromedio = presupuestosAprobadosMes.length ? facturacionMes / presupuestosAprobadosMes.length : 0
+  const presupuestosPendientesMonto = presupuestos
+    .filter((p) => p.estado_actual === 'borrador')
+    .reduce((sum, p) => sum + (p.monto || 0), 0)
+
+  const ticketsActivos = tickets.filter((t) => !ESTADOS_TERMINALES.includes(t.estado_actual))
+  const antiguedades = ticketsActivos
+    .map((t) => diasDesde(t.fecha_ultimo_cambio))
+    .filter((d) => d != null)
+  const antiguedadPromedio = antiguedades.length
+    ? antiguedades.reduce((a, b) => a + b, 0) / antiguedades.length
+    : 0
+  const ticketsEstancados = ticketsActivos.filter(
+    (t) => (diasDesde(t.fecha_ultimo_cambio) ?? 0) >= UMBRAL_ESTANCADO,
+  )
+
+  const cargaPorTecnico = Object.values(
+    tareas.reduce((acc, t) => {
+      const nombre = t.usuario
+      if (!nombre) return acc
+      if (!acc[nombre]) acc[nombre] = { nombre, activos: 0 }
+      if (t.estado_actual !== 'completada') acc[nombre].activos += 1
+      return acc
+    }, {}),
+  )
+    .filter((u) => u.activos > 0)
+    .sort((a, b) => b.activos - a.activos)
+    .slice(0, 5)
+  const maxCarga = Math.max(1, ...cargaPorTecnico.map((u) => u.activos))
+
   const donutSegments = DONUT_STAGES.map((stage) => ({
     ...stage,
     value: tickets.filter((t) => t.estado_actual === stage.key).length,
@@ -143,6 +194,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="adm-row-label"><span>Operación de hoy</span><span className="adm-row-label-line" /></div>
       <div className="adm-stats">
         <div className="adm-stat-card">
           <div className="adm-stat-top">
@@ -198,6 +250,41 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="adm-row-label"><span>Negocio del mes</span><span className="adm-row-label-line" /></div>
+      <div className="adm-stats">
+        <div className="adm-stat-card" data-tone="success">
+          <div className="adm-stat-top">
+            <span className="adm-stat-icon"><Wallet size={18} /></span>
+          </div>
+          <span className="adm-stat-value">{formatMoney(facturacionMes)}</span>
+          <span className="adm-stat-label">Facturación del mes</span>
+        </div>
+
+        <div className="adm-stat-card">
+          <div className="adm-stat-top">
+            <span className="adm-stat-icon"><ChartBarBig size={18} /></span>
+          </div>
+          <span className="adm-stat-value">{formatMoney(ticketPromedio)}</span>
+          <span className="adm-stat-label">Ticket promedio</span>
+        </div>
+
+        <div className="adm-stat-card" data-tone="warning">
+          <div className="adm-stat-top">
+            <span className="adm-stat-icon"><Clock size={18} /></span>
+          </div>
+          <span className="adm-stat-value">{formatMoney(presupuestosPendientesMonto)}</span>
+          <span className="adm-stat-label">Presupuestos sin aprobar</span>
+        </div>
+
+        <div className="adm-stat-card" data-tone="info">
+          <div className="adm-stat-top">
+            <span className="adm-stat-icon"><Clock size={18} /></span>
+          </div>
+          <span className="adm-stat-value">{antiguedadPromedio.toFixed(1)} días</span>
+          <span className="adm-stat-label">Antigüedad promedio en taller</span>
+        </div>
+      </div>
+
       <div className="adm-dash-grid">
         <div className="adm-dash-main">
           <div className="adm-panel">
@@ -218,29 +305,42 @@ export default function Dashboard() {
                     <th>Código</th>
                     <th>Problema</th>
                     <th>Estado</th>
-                    <th>Fecha</th>
+                    <th>Antigüedad</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recent.map((t) => (
-                    <tr key={t.tkid}>
-                      <td className="adm-td-id">#{t.tkid}</td>
-                      <td>{t.codigoseguimiento || '—'}</td>
-                      <td>{t.descripcionproblema || '—'}</td>
-                      <td>
-                        <span className={`adm-status adm-status--${estadoClass(t.estado_actual)}`}>
-                          {formatEstado(t.estado_actual)}
-                        </span>
-                      </td>
-                      <td>{t.fechacreacion ? new Date(t.fechacreacion).toLocaleDateString('es-AR') : '—'}</td>
-                      <td>
-                        <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost adm-btn--sm">
-                          Ver
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
+                  {recent.map((t) => {
+                    const dias = diasDesde(t.fecha_ultimo_cambio)
+                    const tono = tonoAntiguedad(dias)
+                    return (
+                      <tr key={t.tkid}>
+                        <td className="adm-td-id">#{t.tkid}</td>
+                        <td>{t.codigoseguimiento || '—'}</td>
+                        <td>{t.descripcionproblema || '—'}</td>
+                        <td>
+                          <span className={`adm-status adm-status--${estadoClass(t.estado_actual)}`}>
+                            {formatEstado(t.estado_actual)}
+                          </span>
+                        </td>
+                        <td>
+                          {ESTADOS_TERMINALES.includes(t.estado_actual) || dias == null ? (
+                            <span className="adm-age adm-age--ok">—</span>
+                          ) : (
+                            <span className={`adm-age adm-age--${tono}`}>
+                              <span className={`adm-age-dot adm-age-dot--${tono}`} />
+                              {dias === 0 ? 'Hoy' : `${dias} día${dias === 1 ? '' : 's'}`}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost adm-btn--sm">
+                            Ver
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
                   {recent.length === 0 && (
                     <tr>
                       <td colSpan="6" className="adm-empty">
@@ -274,12 +374,23 @@ export default function Dashboard() {
 
           <div className="adm-panel">
             <h2><SquareAlert size={20} /> Requiere tu atención</h2>
-            {(stats.esperandoAprobacion + stats.tareasPendientes + stats.presupuestosPendientes) === 0 ? (
+            {(ticketsEstancados.length + stats.esperandoAprobacion + stats.tareasPendientes + stats.presupuestosPendientes) === 0 ? (
               <div className="adm-attention-empty">
                 <CheckDouble size={18} /> Todo al día, no hay pendientes.
               </div>
             ) : (
               <div className="adm-attention-list">
+                {ticketsEstancados.length > 0 && (
+                  <Link to="/admin/tickets" className="adm-attention-item adm-attention-item--hot">
+                    <span className="adm-attention-icon adm-attention-icon--hot"><Clock size={16} /></span>
+                    <span className="adm-attention-text">
+                      <strong>Tickets estancados</strong>
+                      <span>Más de {UMBRAL_ESTANCADO} días sin cambio de estado</span>
+                    </span>
+                    <span className="adm-attention-count">{ticketsEstancados.length}</span>
+                    <ArrowRight size={16} />
+                  </Link>
+                )}
                 {stats.esperandoAprobacion > 0 && (
                   <Link to="/admin/tickets" className="adm-attention-item">
                     <span className="adm-attention-icon"><Clock size={16} /></span>
@@ -316,6 +427,28 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+
+          {cargaPorTecnico.length > 0 && (
+            <div className="adm-panel">
+              <h2><Human size={20} /> Carga de trabajo por técnico</h2>
+              <p className="adm-panel-sub">Tickets y tareas activas asignadas</p>
+              <div className="adm-workload">
+                {cargaPorTecnico.map((u) => (
+                  <div className="adm-workload-row" key={u.nombre}>
+                    <span className="adm-workload-avatar">{iniciales(u.nombre)}</span>
+                    <span className="adm-workload-name">{u.nombre}</span>
+                    <span className="adm-workload-track">
+                      <span
+                        className="adm-workload-fill"
+                        style={{ width: `${(u.activos / maxCarga) * 100}%` }}
+                      />
+                    </span>
+                    <span className="adm-workload-count">{u.activos} activos</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="adm-panel">
             <h2>Accesos rápidos</h2>

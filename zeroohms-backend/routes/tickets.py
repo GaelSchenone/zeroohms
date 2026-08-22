@@ -28,6 +28,11 @@ router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
 
 def _get_estado_actual_tk(db: Session, tkid: int) -> str | None:
+    info = _get_estado_actual_info_tk(db, tkid)
+    return info[0] if info else None
+
+
+def _get_estado_actual_info_tk(db: Session, tkid: int) -> tuple[str, datetime] | None:
     last = (
         db.query(EstadoTK, PosEstadoTK)
         .join(PosEstadoTK, EstadoTK.posestadotkid == PosEstadoTK.posestadotkid)
@@ -35,7 +40,7 @@ def _get_estado_actual_tk(db: Session, tkid: int) -> str | None:
         .order_by(EstadoTK.fechacambio.desc())
         .first()
     )
-    return last[1].posestado if last else None
+    return (last[1].posestado, last[0].fechacambio) if last else None
 
 
 @router.get("", response_model=list[TicketResponse])
@@ -62,7 +67,7 @@ def list_tickets(
 
     result = []
     for t in tickets:
-        estado_actual = _get_estado_actual_tk(db, t.tkid)
+        info = _get_estado_actual_info_tk(db, t.tkid)
         result.append(
             TicketResponse(
                 tkid=t.tkid,
@@ -71,7 +76,8 @@ def list_tickets(
                 dispositivoid=t.dispositivoid,
                 descripcionproblema=t.descripcionproblema,
                 fechacreacion=t.fechacreacion,
-                estado_actual=estado_actual,
+                estado_actual=info[0] if info else None,
+                fecha_ultimo_cambio=info[1] if info else None,
             )
         )
     return result
@@ -96,12 +102,13 @@ def create_ticket(
     db.add(ticket)
     db.flush()
 
+    fecha_estado = datetime.utcnow()
     pos_estado_nuevo = db.query(PosEstadoTK).filter(PosEstadoTK.posestado == "ticket_creado").first()
     if pos_estado_nuevo:
         estado = EstadoTK(
             posestadotkid=pos_estado_nuevo.posestadotkid,
             tkid=ticket.tkid,
-            fechacambio=datetime.utcnow(),
+            fechacambio=fecha_estado,
         )
         db.add(estado)
 
@@ -116,6 +123,7 @@ def create_ticket(
         descripcionproblema=ticket.descripcionproblema,
         fechacreacion=ticket.fechacreacion,
         estado_actual="ticket_creado",
+        fecha_ultimo_cambio=fecha_estado if pos_estado_nuevo else None,
     )
 
 
@@ -135,7 +143,9 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
 
-    estado_actual = _get_estado_actual_tk(db, tkid)
+    info_estado = _get_estado_actual_info_tk(db, tkid)
+    estado_actual = info_estado[0] if info_estado else None
+    fecha_ultimo_cambio = info_estado[1] if info_estado else None
 
     prop_dni = prop_nombre = prop_apellido = prop_email = prop_tel = None
     disp_marca = disp_modelo = disp_serie = None
@@ -252,6 +262,7 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
         descripcionproblema=ticket.descripcionproblema,
         fechacreacion=ticket.fechacreacion,
         estado_actual=estado_actual,
+        fecha_ultimo_cambio=fecha_ultimo_cambio,
         propietario_dni=prop_dni,
         propietario_nombre=prop_nombre,
         propietario_apellido=prop_apellido,
@@ -289,7 +300,7 @@ def update_ticket(
     db.commit()
     db.refresh(ticket)
 
-    estado_actual = _get_estado_actual_tk(db, tkid)
+    info = _get_estado_actual_info_tk(db, tkid)
     return TicketResponse(
         tkid=ticket.tkid,
         codigoseguimiento=ticket.codigoseguimiento,
@@ -297,7 +308,8 @@ def update_ticket(
         dispositivoid=ticket.dispositivoid,
         descripcionproblema=ticket.descripcionproblema,
         fechacreacion=ticket.fechacreacion,
-        estado_actual=estado_actual,
+        estado_actual=info[0] if info else None,
+        fecha_ultimo_cambio=info[1] if info else None,
     )
 
 
@@ -347,10 +359,11 @@ def cambiar_estado(
         if body.posestado_id != 9 and body.posestado_id < actual_id:
             raise HTTPException(status_code=400, detail="Retroceso no permitido")
 
+    fecha_estado = datetime.utcnow()
     nuevo_estado = EstadoTK(
         posestadotkid=body.posestado_id,
         tkid=tkid,
-        fechacambio=datetime.utcnow(),
+        fechacambio=fecha_estado,
     )
     db.add(nuevo_estado)
     db.commit()
@@ -374,4 +387,5 @@ def cambiar_estado(
         descripcionproblema=ticket.descripcionproblema,
         fechacreacion=ticket.fechacreacion,
         estado_actual=pos_estado.posestado,
+        fecha_ultimo_cambio=fecha_estado,
     )
