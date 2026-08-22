@@ -148,24 +148,109 @@
   font-style: italic;
 }
 
-.tk-add-row{
+.tk-card--selected{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(240, 81, 59, 0.25);
+}
+
+/* ---- Presets ---- */
+
+.tk-preset-menu{
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 20;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.55rem;
-  margin-top: 0.5rem;
-  border-radius: 8px;
-  border: 1px dashed rgba(255, 255, 255, 0.16);
+  flex-direction: column;
+  min-width: 220px;
+  background: #161616;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.tk-preset-menu button{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.6rem 0.85rem;
   background: transparent;
-  color: var(--text-tertiary);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  text-align: left;
   cursor: pointer;
 }
 
-.tk-add-row:hover{
-  color: var(--accent);
-  border-color: rgba(240, 81, 59, 0.4);
+.tk-preset-menu button:last-child{
+  border-bottom: none;
+}
+
+.tk-preset-menu button:hover{
+  background: var(--surface-2);
+}
+
+.tk-preset-menu strong{
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tk-preset-menu span{
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+/* ---- Bulk selection toolbar ---- */
+
+.tk-bulkbar{
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.85rem;
   background: var(--accent-soft);
+  border: 1px solid rgba(240, 81, 59, 0.35);
+  border-radius: 10px;
+}
+
+.tk-bulk-count{
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.tk-bulk-link{
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tk-bulk-link:hover{
+  text-decoration: underline;
+}
+
+.tk-bulk-sep{
+  width: 1px;
+  height: 1.1rem;
+  background: var(--border-strong);
+  margin: 0 0.2rem;
+}
+
+.tk-bulk-select{
+  padding: 0.35rem 0.6rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
 }

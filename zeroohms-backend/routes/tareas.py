@@ -53,6 +53,13 @@ def list_tareas(
     return result
 
 
+@router.get("/estados", response_model=list[dict])
+def get_estados_tarea(db: Session = Depends(get_db), _usuario: str = Depends(get_current_user)):
+    """Devuelve todos los estados posibles para tareas (catálogo PosEstadosTareas)."""
+    estados = db.query(PosEstadoTarea).order_by(PosEstadoTarea.posestadotid).all()
+    return [{"id": e.posestadotid, "nombre": e.posestado} for e in estados]
+
+
 @router.post("", response_model=TareaResponse, status_code=201)
 def create_tarea(
     body: TareaCreate,

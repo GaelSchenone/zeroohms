@@ -1,19 +1,52 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api/client.js'
 import { Plus } from 'pixelarticons/react'
 import { iniciales } from '../../utils/format.js'
 import './TareaKanban.css'
 
-const COLUMNAS = [
-  { id: 1, titulo: 'Pendiente', nombre: 'pendiente', tono: 'blue', permiteAgregar: true },
-  { id: 2, titulo: 'En progreso', nombre: 'en progreso', tono: 'amber', permiteAgregar: false },
-  { id: 3, titulo: 'Completada', nombre: 'completada', tono: 'green', permiteAgregar: false },
+// Las columnas visibles del tablero. Los id/nombre reales de cada estado
+// se traen del backend (GET /tareas/estados) porque el catálogo PosEstadosTareas
+// también incluye "pausada" y "cancelada", que este tablero no muestra.
+const NOMBRES_VISIBLES = ['pendiente', 'en_progreso', 'completada']
+const TITULOS = { pendiente: 'Pendiente', en_progreso: 'En progreso', completada: 'Completada' }
+const TONOS = { pendiente: 'blue', en_progreso: 'amber', completada: 'green' }
+
+const PRESETS = [
+  {
+    id: 'diagnostico',
+    label: 'Diagnóstico',
+    tareas: [
+      'Diagnóstico inicial del problema',
+      'Confirmar el problema reportado con el cliente',
+      'Presupuestar la reparación',
+    ],
+  },
+  {
+    id: 'actualizacion',
+    label: 'Actualización',
+    tareas: [
+      'Backup de datos del cliente',
+      'Actualizar sistema operativo y drivers',
+      'Verificar funcionamiento post-actualización',
+    ],
+  },
+  {
+    id: 'reparacion',
+    label: 'Reparación',
+    tareas: [
+      'Desarmar el equipo',
+      'Reemplazar la pieza defectuosa',
+      'Probar funcionamiento',
+      'Armar el equipo',
+    ],
+  },
 ]
 
 function estaVencida(tarea) {
   if (!tarea.fechalimite || tarea.estado_actual === 'completada') return false
   return new Date(tarea.fechalimite) < new Date(new Date().toDateString())
 }
+
 const PRIORIDADES = ['baja', 'media', 'alta']
 const FORM_VACIO = { descripcion: '', prioridad: 'media', usuario: '', fechalimite: '' }
 
@@ -26,15 +59,33 @@ export default function TareaKanban({
 }) {
   const [tareas, setTareas] = useState([])
   const [usuarios, setUsuarios] = useState([])
+  const [columnas, setColumnas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(FORM_VACIO)
   const [guardando, setGuardando] = useState(false)
-  const [dragId, setDragId] = useState(null)
+  const [showPresetMenu, setShowPresetMenu] = useState(false)
+  const [cargandoPreset, setCargandoPreset] = useState(false)
+
+  const [draggingIds, setDraggingIds] = useState([])
   const [overCol, setOverCol] = useState(null)
 
+  const [selected, setSelected] = useState(new Set())
+  const [lastClicked, setLastClicked] = useState(null)
+  const [aplicandoBulk, setAplicandoBulk] = useState(false)
+
   const puedeCrear = showCreate && Boolean(tkid)
+  const presetRef = useRef(null)
+
+  useEffect(() => {
+    if (!showPresetMenu) return
+    const onClickOutside = (e) => {
+      if (presetRef.current && !presetRef.current.contains(e.target)) setShowPresetMenu(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [showPresetMenu])
 
   const fetchTareas = () => {
     setLoading(true)
@@ -49,7 +100,23 @@ export default function TareaKanban({
   useEffect(fetchTareas, [tkid])
 
   useEffect(() => {
-    if (!showForm) return
+    let activo = true
+    api('/tareas/estados')
+      .then((data) => {
+        if (!activo) return
+        const cols = NOMBRES_VISIBLES
+          .map((nombre) => data.find((e) => e.nombre === nombre))
+          .filter(Boolean)
+          .map((e) => ({ id: e.id, nombre: e.nombre, titulo: TITULOS[e.nombre] || e.nombre, tono: TONOS[e.nombre] || 'blue' }))
+        setColumnas(cols)
+      })
+      .catch(() => setColumnas([]))
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  useEffect(() => {
     let activo = true
     api('/usuarios?per_page=100')
       .then((us) => {
@@ -59,27 +126,32 @@ export default function TareaKanban({
     return () => {
       activo = false
     }
-  }, [showForm])
+  }, [])
 
-  const moverTarea = async (tareaid, posestadoId) => {
-    const tarea = tareas.find((t) => t.tareaid === tareaid)
-    if (!tarea || tarea.posestado_id === posestadoId) return
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelected(new Set())
+        setLastClicked(null)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  const flatOrder = columnas.flatMap((col) => tareas.filter((t) => t.estado_actual === col.nombre))
+
+  const moverVarias = async (ids, posestadoId) => {
+    const columna = columnas.find((c) => c.id === posestadoId)
+    if (!columna) return
     const anterior = tareas
-    const columna = COLUMNAS.find((c) => c.id === posestadoId)
+    const idsSet = new Set(ids)
     setError(null)
-    // Actualización optimista: la tarjeta se mueve al instante
-    setTareas((ts) =>
-      ts.map((t) =>
-        t.tareaid === tareaid
-          ? { ...t, posestado_id: posestadoId, estado_actual: columna.nombre }
-          : t,
-      ),
-    )
+    setTareas((ts) => ts.map((t) => (idsSet.has(t.tareaid) ? { ...t, estado_actual: columna.nombre } : t)))
     try {
-      await api(`/tareas/${tareaid}/estado`, {
-        method: 'POST',
-        body: { posestado_id: posestadoId },
-      })
+      await Promise.all(
+        ids.map((tareaid) => api(`/tareas/${tareaid}/estado`, { method: 'POST', body: { posestado_id: posestadoId } })),
+      )
     } catch (err) {
       setTareas(anterior)
       setError(err.message)
@@ -91,6 +163,11 @@ export default function TareaKanban({
     try {
       await api(`/tareas/${tareaid}`, { method: 'DELETE' })
       setTareas((prev) => prev.filter((t) => t.tareaid !== tareaid))
+      setSelected((prev) => {
+        const next = new Set(prev)
+        next.delete(tareaid)
+        return next
+      })
     } catch (err) {
       setError(err.message)
     }
@@ -121,16 +198,61 @@ export default function TareaKanban({
     }
   }
 
+  const cargarPreset = async (preset) => {
+    setShowPresetMenu(false)
+    setCargandoPreset(true)
+    setError(null)
+    try {
+      await Promise.all(
+        preset.tareas.map((descripcion) =>
+          api('/tareas', { method: 'POST', body: { tkid, descripcion, prioridad: 'media' } }),
+        ),
+      )
+      fetchTareas()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCargandoPreset(false)
+    }
+  }
+
   const setCampo = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }))
 
+  const handleCardClick = (e, tareaid) => {
+    if (e.shiftKey && lastClicked != null) {
+      const ids = flatOrder.map((t) => t.tareaid)
+      const i1 = ids.indexOf(lastClicked)
+      const i2 = ids.indexOf(tareaid)
+      if (i1 !== -1 && i2 !== -1) {
+        const [start, end] = i1 < i2 ? [i1, i2] : [i2, i1]
+        setSelected(new Set(ids.slice(start, end + 1)))
+        return
+      }
+    }
+    if (e.ctrlKey || e.metaKey) {
+      setSelected((prev) => {
+        const next = new Set(prev)
+        if (next.has(tareaid)) next.delete(tareaid)
+        else next.add(tareaid)
+        return next
+      })
+      setLastClicked(tareaid)
+      return
+    }
+    setSelected(new Set([tareaid]))
+    setLastClicked(tareaid)
+  }
+
   const handleDragStart = (e, tareaid) => {
-    e.dataTransfer.setData('text/plain', String(tareaid))
+    const idsAMover = selected.has(tareaid) && selected.size > 1 ? [...selected] : [tareaid]
+    if (idsAMover.length === 1) setSelected(new Set())
+    e.dataTransfer.setData('text/plain', JSON.stringify(idsAMover))
     e.dataTransfer.effectAllowed = 'move'
-    setDragId(tareaid)
+    setDraggingIds(idsAMover)
   }
 
   const handleDragEnd = () => {
-    setDragId(null)
+    setDraggingIds([])
     setOverCol(null)
   }
 
@@ -142,22 +264,66 @@ export default function TareaKanban({
 
   const handleDrop = (e, colId) => {
     e.preventDefault()
-    const tareaid = Number(e.dataTransfer.getData('text/plain'))
-    if (tareaid) moverTarea(tareaid, colId)
-    setDragId(null)
+    try {
+      const ids = JSON.parse(e.dataTransfer.getData('text/plain'))
+      if (Array.isArray(ids) && ids.length) moverVarias(ids, colId)
+    } catch {
+      // ignora un drop sin datos válidos
+    }
+    setDraggingIds([])
     setOverCol(null)
+  }
+
+  const aplicarAsignar = async (usuario) => {
+    if (!usuario || selected.size === 0) return
+    setAplicandoBulk(true)
+    setError(null)
+    const ids = [...selected]
+    try {
+      await Promise.all(ids.map((tareaid) => api(`/tareas/${tareaid}`, { method: 'PUT', body: { usuario } })))
+      fetchTareas()
+      setSelected(new Set())
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAplicandoBulk(false)
+    }
+  }
+
+  const aplicarEstado = async (posestadoId) => {
+    if (!posestadoId || selected.size === 0) return
+    const ids = [...selected]
+    setAplicandoBulk(true)
+    await moverVarias(ids, Number(posestadoId))
+    setAplicandoBulk(false)
+    setSelected(new Set())
   }
 
   return (
     <div className="adm-panel">
       <div className="adm-panel-head">
         <h2>{title}</h2>
-        <div className="adm-filters">
+        <div className="adm-filters" style={{ position: 'relative' }} ref={presetRef}>
           {actions}
           {puedeCrear && (
-            <button type="button" className="adm-btn" onClick={() => setShowForm(true)}>
-              <Plus aria-hidden="true" /> Nueva tarea
-            </button>
+            <>
+              <button type="button" className="adm-btn adm-btn--subtle" onClick={() => setShowPresetMenu((v) => !v)} disabled={cargandoPreset}>
+                {cargandoPreset ? 'Cargando…' : 'Cargar preset'}
+              </button>
+              {showPresetMenu && (
+                <div className="tk-preset-menu">
+                  {PRESETS.map((preset) => (
+                    <button type="button" key={preset.id} onClick={() => cargarPreset(preset)}>
+                      <strong>{preset.label}</strong>
+                      <span>{preset.tareas.length} tareas</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button type="button" className="adm-btn" onClick={() => setShowForm(true)}>
+                <Plus aria-hidden="true" /> Nueva tarea
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -165,6 +331,41 @@ export default function TareaKanban({
       {error && (
         <div className="adm-error" role="alert">
           {error}
+        </div>
+      )}
+
+      {selected.size > 0 && (
+        <div className="tk-bulkbar">
+          <span className="tk-bulk-count">{selected.size} seleccionada{selected.size === 1 ? '' : 's'}</span>
+          <button type="button" className="tk-bulk-link" onClick={() => setSelected(new Set(flatOrder.map((t) => t.tareaid)))}>
+            Seleccionar todas
+          </button>
+          <button type="button" className="tk-bulk-link" onClick={() => setSelected(new Set())}>
+            Deseleccionar
+          </button>
+          <span className="tk-bulk-sep" />
+          <select
+            className="tk-bulk-select"
+            defaultValue=""
+            disabled={aplicandoBulk}
+            onChange={(e) => { aplicarAsignar(e.target.value); e.target.value = '' }}
+          >
+            <option value="" disabled>Asignar a…</option>
+            {usuarios.map((u) => (
+              <option key={u.usuario} value={u.usuario}>{u.usuario}</option>
+            ))}
+          </select>
+          <select
+            className="tk-bulk-select"
+            defaultValue=""
+            disabled={aplicandoBulk}
+            onChange={(e) => { aplicarEstado(e.target.value); e.target.value = '' }}
+          >
+            <option value="" disabled>Marcar como…</option>
+            {columnas.map((col) => (
+              <option key={col.id} value={col.id}>{col.titulo}</option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -201,8 +402,8 @@ export default function TareaKanban({
         <div className="adm-loading">Cargando tareas…</div>
       ) : (
         <div className="adm-kanban">
-          {COLUMNAS.map((col) => {
-            const deColumna = tareas.filter((t) => t.posestado_id === col.id)
+          {columnas.map((col) => {
+            const deColumna = tareas.filter((t) => t.estado_actual === col.nombre)
             return (
               <section
                 key={col.id}
@@ -222,11 +423,13 @@ export default function TareaKanban({
                   {deColumna.length === 0 && <div className="adm-kanban-empty">Sin tareas</div>}
                   {deColumna.map((t) => {
                     const vencida = estaVencida(t)
+                    const isSelected = selected.has(t.tareaid)
                     return (
                       <article
                         key={t.tareaid}
-                        className={`adm-kanban-card tk-card${dragId === t.tareaid ? ' tk-card--dragging' : ''}${col.nombre === 'completada' ? ' tk-card--completa' : ''}`}
+                        className={`adm-kanban-card tk-card${draggingIds.includes(t.tareaid) ? ' tk-card--dragging' : ''}${col.nombre === 'completada' ? ' tk-card--completa' : ''}${isSelected ? ' tk-card--selected' : ''}`}
                         draggable
+                        onClick={(e) => handleCardClick(e, t.tareaid)}
                         onDragStart={(e) => handleDragStart(e, t.tareaid)}
                         onDragEnd={handleDragEnd}
                       >
@@ -258,7 +461,7 @@ export default function TareaKanban({
                             <button
                               type="button"
                               className="adm-btn adm-btn--ghost"
-                              onClick={() => eliminarTarea(t.tareaid)}
+                              onClick={(e) => { e.stopPropagation(); eliminarTarea(t.tareaid) }}
                             >
                               Eliminar
                             </button>
@@ -268,11 +471,6 @@ export default function TareaKanban({
                     )
                   })}
                 </div>
-                {puedeCrear && col.permiteAgregar && (
-                  <button type="button" className="tk-add-row" onClick={() => setShowForm(true)}>
-                    <Plus size={14} aria-hidden="true" /> Nueva tarea
-                  </button>
-                )}
               </section>
             )
           })}
