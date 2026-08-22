@@ -239,6 +239,8 @@
 .adm-user-text{
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
   line-height: 1.2;
 }
 

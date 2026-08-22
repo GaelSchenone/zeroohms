@@ -103,8 +103,8 @@ export default function AdminLayout() {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Buscar ticket, cliente…"
-              aria-label="Buscar tickets y clientes"
+              placeholder="Buscar ticket, cliente, DNI, N° de serie…"
+              aria-label="Buscar tickets, clientes y equipos"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -115,11 +115,11 @@ export default function AdminLayout() {
             )}
           </form>
           <div className="adm-user">
-            <span className="adm-user-avatar">{initials}</span>
             <div className="adm-user-text">
               <strong>{user?.usuario || '...'}</strong>
               <span>{user?.mail || ''}</span>
             </div>
+            <span className="adm-user-avatar">{initials}</span>
           </div>
         </header>
 
