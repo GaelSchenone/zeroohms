@@ -153,52 +153,111 @@
   box-shadow: 0 0 0 2px rgba(240, 81, 59, 0.25);
 }
 
-/* ---- Presets ---- */
+/* ---- Presets: combobox personalizado ---- */
+
+.tk-combo{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem 0.55rem 0.95rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.tk-combo svg{
+  color: var(--text-tertiary);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.tk-combo:hover{
+  background: var(--surface-2);
+  color: #fff;
+}
+
+.tk-combo:hover svg{
+  color: var(--text-secondary);
+}
+
+.tk-combo.is-open{
+  background: var(--accent-soft);
+  border-color: rgba(240, 81, 59, 0.4);
+  color: var(--accent);
+}
+
+.tk-combo.is-open svg{
+  color: var(--accent);
+  transform: rotate(180deg);
+}
 
 .tk-preset-menu{
   position: absolute;
-  top: calc(100% + 0.4rem);
+  top: calc(100% + 0.5rem);
   right: 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  min-width: 220px;
+  gap: 0.2rem;
+  min-width: 260px;
+  padding: 0.4rem;
   background: #161616;
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: var(--shadow-md);
-  overflow: hidden;
 }
 
 .tk-preset-menu button{
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  padding: 0.6rem 0.85rem;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.6rem;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border);
+  border-radius: 8px;
   color: var(--text-secondary);
   text-align: left;
   cursor: pointer;
-}
-
-.tk-preset-menu button:last-child{
-  border-bottom: none;
+  transition: background 0.12s ease;
 }
 
 .tk-preset-menu button:hover{
-  background: var(--surface-2);
+  background: var(--accent-soft);
 }
 
-.tk-preset-menu strong{
+.tk-preset-icon{
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.tk-preset-menu button:hover .tk-preset-icon{
+  background: var(--accent-soft-strong);
+}
+
+.tk-preset-text{
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.tk-preset-text strong{
   font-size: 0.85rem;
   color: #fff;
   font-weight: 600;
 }
 
-.tk-preset-menu span{
+.tk-preset-count{
   font-size: 0.72rem;
   color: var(--text-tertiary);
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api/client.js'
-import { Plus } from 'pixelarticons/react'
+import { Plus, Search, Reload, SettingsCog2, ChevronDown } from 'pixelarticons/react'
 import { iniciales } from '../../utils/format.js'
 import './TareaKanban.css'
 
@@ -15,6 +15,7 @@ const PRESETS = [
   {
     id: 'diagnostico',
     label: 'Diagnóstico',
+    icon: Search,
     tareas: [
       'Diagnóstico inicial del problema',
       'Confirmar el problema reportado con el cliente',
@@ -24,6 +25,7 @@ const PRESETS = [
   {
     id: 'actualizacion',
     label: 'Actualización',
+    icon: Reload,
     tareas: [
       'Backup de datos del cliente',
       'Actualizar sistema operativo y drivers',
@@ -33,6 +35,7 @@ const PRESETS = [
   {
     id: 'reparacion',
     label: 'Reparación',
+    icon: SettingsCog2,
     tareas: [
       'Desarmar el equipo',
       'Reemplazar la pieza defectuosa',
@@ -307,17 +310,29 @@ export default function TareaKanban({
           {actions}
           {puedeCrear && (
             <>
-              <button type="button" className="adm-btn adm-btn--subtle" onClick={() => setShowPresetMenu((v) => !v)} disabled={cargandoPreset}>
-                {cargandoPreset ? 'Cargando…' : 'Cargar preset'}
+              <button
+                type="button"
+                className={`tk-combo${showPresetMenu ? ' is-open' : ''}`}
+                onClick={() => setShowPresetMenu((v) => !v)}
+                disabled={cargandoPreset}
+              >
+                <span>{cargandoPreset ? 'Cargando…' : 'Cargar preset'}</span>
+                <ChevronDown size={16} aria-hidden="true" />
               </button>
               {showPresetMenu && (
-                <div className="tk-preset-menu">
-                  {PRESETS.map((preset) => (
-                    <button type="button" key={preset.id} onClick={() => cargarPreset(preset)}>
-                      <strong>{preset.label}</strong>
-                      <span>{preset.tareas.length} tareas</span>
-                    </button>
-                  ))}
+                <div className="tk-preset-menu" role="listbox">
+                  {PRESETS.map((preset) => {
+                    const Icon = preset.icon
+                    return (
+                      <button type="button" key={preset.id} role="option" onClick={() => cargarPreset(preset)}>
+                        <span className="tk-preset-icon"><Icon size={16} aria-hidden="true" /></span>
+                        <span className="tk-preset-text">
+                          <strong>{preset.label}</strong>
+                          <span className="tk-preset-count">{preset.tareas.length} tareas</span>
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
               <button type="button" className="adm-btn" onClick={() => setShowForm(true)}>
