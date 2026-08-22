@@ -6,8 +6,9 @@ import TareaKanban from '../components/tickets/TareaKanban.jsx'
 import TicketFlowStepper from '../components/tickets/TicketFlowStepper.jsx'
 import AsignarClienteModal from '../components/tickets/AsignarClienteModal.jsx'
 import FotosTicket from '../components/tickets/FotosTicket.jsx'
+import PresupuestoEditor from '../components/tickets/PresupuestoEditor.jsx'
 
-const TABS = ['info', 'tareas', 'fotos', 'checklist']
+const TABS = ['info', 'tareas', 'fotos', 'presupuesto', 'checklist']
 
 export default function TicketDetail() {
   const { id } = useParams()
@@ -245,6 +246,7 @@ export default function TicketDetail() {
             {t === 'info' && 'Información'}
             {t === 'tareas' && 'Tareas'}
             {t === 'fotos' && `Fotos${ticket.fotos?.length ? ` (${ticket.fotos.length})` : ''}`}
+            {t === 'presupuesto' && 'Presupuesto'}
             {t === 'checklist' && 'Checklist'}
           </button>
         ))}
@@ -359,6 +361,12 @@ export default function TicketDetail() {
         {tab === 'fotos' && (
           <div style={{ paddingTop: '1rem' }}>
             <FotosTicket tkid={id} />
+          </div>
+        )}
+
+        {tab === 'presupuesto' && (
+          <div style={{ paddingTop: '1rem' }}>
+            <PresupuestoEditor tkid={id} />
           </div>
         )}
 
