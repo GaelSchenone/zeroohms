@@ -1517,6 +1517,92 @@
   background: var(--border);
 }
 
+/* ---- Ticket detail page ---- */
+
+.adm-crumb{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+.adm-crumb a{
+  color: var(--text-tertiary);
+}
+
+.adm-crumb strong{
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.tk-head{
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.tk-head-title{
+  font-family: 'NType82', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.tk-head-code{
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tk-head-actions{
+  margin-left: auto;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.tk-info-grid{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.tk-info-col{
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  min-width: 0;
+}
+
+.tk-checklist-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.tk-checklist-row .name{
+  color: #fff;
+  font-weight: 600;
+}
+
+.tk-checklist-row .when{
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 1024px){
+  .tk-info-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Checklist runner ---- */
 
 .chk-question{
