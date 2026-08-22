@@ -10,6 +10,7 @@ class EstadoResponse(BaseModel):
     posestado_id: int
     posestado_nombre: str | None = None
     fechacambio: datetime | None = None
+    notificado: bool = False
 
     class Config:
         from_attributes = True

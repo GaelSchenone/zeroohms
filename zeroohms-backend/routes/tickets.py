@@ -22,7 +22,7 @@ from schemas.presupuesto import PresupuestoResponse
 from schemas.foto import FotoResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
-from services.webhook_service import generate_tracking_code, send_webhook
+from services.webhook_service import generate_tracking_code, enviar_webhook_estado
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
@@ -265,6 +265,7 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
                 posestado_id=pos.posestadotkid,
                 posestado_nombre=pos.posestado,
                 fechacambio=e.fechacambio,
+                notificado=e.notificado,
             )
         )
 
@@ -383,7 +384,9 @@ def cambiar_estado(
     db.commit()
 
     background_tasks.add_task(
-        send_webhook,
+        enviar_webhook_estado,
+        tkid,
+        body.posestado_id,
         "estado-cambiado",
         {
             "tkid": tkid,

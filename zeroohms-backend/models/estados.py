@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -55,6 +55,7 @@ class EstadoTK(Base):
     posestadotkid = Column("PosEstadoTKID", Integer, ForeignKey("PosEstadosTKs.PosEstadoTKID"), primary_key=True)
     tkid = Column("TKID", Integer, ForeignKey("TKs.TKID"), primary_key=True)
     fechacambio = Column("FechaCambio", DateTime, default=datetime.utcnow, primary_key=True)
+    notificado = Column("Notificado", Boolean, nullable=False, default=False)
 
     estado_pos = relationship("PosEstadoTK")
 

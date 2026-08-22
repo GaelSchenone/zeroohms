@@ -28,6 +28,11 @@ export default function TicketTimeline({ historial = [], estadoActual = '', esta
               <span className="tl-label">{formatEstado(estado.nombre)}</span>
               {estado.descripcion ? <span className="tl-desc">{estado.descripcion}</span> : null}
               <span className="tl-fecha">{h?.fechacambio ? formatDateTime(h.fechacambio) : 'Pendiente'}</span>
+              {hecho && i > 0 && (
+                <span className={`tl-notif${h.notificado ? ' is-ok' : ' is-off'}`}>
+                  {h.notificado ? 'Cliente notificado' : 'No se notificó al cliente'}
+                </span>
+              )}
             </div>
           </li>
         )

@@ -90,6 +90,20 @@
   color: rgba(255, 255, 255, 0.35);
 }
 
+.tl-notif {
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.tl-notif.is-ok {
+  color: #6ee79f;
+}
+
+.tl-notif.is-off {
+  color: rgba(255, 255, 255, 0.35);
+}
+
 @media (max-width: 720px) {
   .tl-item {
     gap: 0.7rem;
