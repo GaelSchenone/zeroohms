@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api/client.js'
 import { Plus, Search, Reload, SettingsCog2, ChevronDown } from 'pixelarticons/react'
 import { iniciales } from '../../utils/format.js'
+import Combobox from './Combobox.jsx'
 import './TareaKanban.css'
 
 // Las columnas visibles del tablero. Los id/nombre reales de cada estado
@@ -265,6 +266,9 @@ export default function TareaKanban({
 
   const setCampo = (campo) => (e) => setForm((f) => ({ ...f, [campo]: e.target.value }))
 
+  // La selección múltiple es exclusivamente con Ctrl/Cmd o Shift. Un click
+  // simple no selecciona nada: así no molesta al doble click de editar
+  // (que dispara un click normal antes del dblclick).
   const handleCardClick = (e, tareaid) => {
     if (e.shiftKey && lastClicked != null) {
       const ids = flatOrder.map((t) => t.tareaid)
@@ -273,8 +277,8 @@ export default function TareaKanban({
       if (i1 !== -1 && i2 !== -1) {
         const [start, end] = i1 < i2 ? [i1, i2] : [i2, i1]
         setSelected(new Set(ids.slice(start, end + 1)))
-        return
       }
+      return
     }
     if (e.ctrlKey || e.metaKey) {
       setSelected((prev) => {
@@ -284,10 +288,7 @@ export default function TareaKanban({
         return next
       })
       setLastClicked(tareaid)
-      return
     }
-    setSelected(new Set([tareaid]))
-    setLastClicked(tareaid)
   }
 
   const handleDragStart = (e, tareaid) => {
@@ -403,28 +404,20 @@ export default function TareaKanban({
             Deseleccionar
           </button>
           <span className="tk-bulk-sep" />
-          <select
-            className="tk-bulk-select"
-            defaultValue=""
+          <Combobox
+            placeholder="Asignar a…"
+            value={null}
+            onChange={aplicarAsignar}
+            options={usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))}
             disabled={aplicandoBulk}
-            onChange={(e) => { aplicarAsignar(e.target.value); e.target.value = '' }}
-          >
-            <option value="" disabled>Asignar a…</option>
-            {usuarios.map((u) => (
-              <option key={u.usuario} value={u.usuario}>{u.usuario}</option>
-            ))}
-          </select>
-          <select
-            className="tk-bulk-select"
-            defaultValue=""
+          />
+          <Combobox
+            placeholder="Marcar como…"
+            value={null}
+            onChange={(v) => aplicarEstado(Number(v))}
+            options={columnas.map((col) => ({ value: col.id, label: col.titulo }))}
             disabled={aplicandoBulk}
-            onChange={(e) => { aplicarEstado(e.target.value); e.target.value = '' }}
-          >
-            <option value="" disabled>Marcar como…</option>
-            {columnas.map((col) => (
-              <option key={col.id} value={col.id}>{col.titulo}</option>
-            ))}
-          </select>
+          />
           <span className="tk-bulk-sep" />
           <button type="button" className="tk-bulk-danger" onClick={eliminarVarias} disabled={aplicandoBulk}>
             Eliminar seleccionadas
@@ -440,17 +433,17 @@ export default function TareaKanban({
             value={form.descripcion}
             onChange={setCampo('descripcion')}
           />
-          <select value={form.prioridad} onChange={setCampo('prioridad')}>
-            {PRIORIDADES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
-          </select>
-          <select value={form.usuario} onChange={setCampo('usuario')}>
-            <option value="">Sin asignar</option>
-            {usuarios.map((u) => (
-              <option key={u.usuario} value={u.usuario}>{u.usuario}</option>
-            ))}
-          </select>
+          <Combobox
+            value={form.prioridad}
+            onChange={(v) => setForm((f) => ({ ...f, prioridad: v }))}
+            options={PRIORIDADES.map((p) => ({ value: p, label: p.charAt(0).toUpperCase() + p.slice(1) }))}
+          />
+          <Combobox
+            placeholder="Sin asignar"
+            value={form.usuario}
+            onChange={(v) => setForm((f) => ({ ...f, usuario: v }))}
+            options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))]}
+          />
           <input type="date" value={form.fechalimite} onChange={setCampo('fechalimite')} />
           <button type="submit" className="adm-btn" disabled={guardando}>
             {guardando ? 'Guardando…' : 'Guardar'}
@@ -572,19 +565,16 @@ export default function TareaKanban({
                           )}
 
                           {editando?.tareaid === t.tareaid && editando.campo === 'usuario' ? (
-                            <select
-                              className="tk-edit-select"
-                              autoFocus
-                              defaultValue={t.usuario || ''}
-                              onClick={(e) => e.stopPropagation()}
-                              onBlur={() => setEditando(null)}
-                              onChange={(e) => guardarCampo(t.tareaid, 'usuario', e.target.value || null)}
-                            >
-                              <option value="">Sin asignar</option>
-                              {usuarios.map((u) => (
-                                <option key={u.usuario} value={u.usuario}>{u.usuario}</option>
-                              ))}
-                            </select>
+                            <span onClick={(e) => e.stopPropagation()}>
+                              <Combobox
+                                autoOpen
+                                placeholder="Sin asignar"
+                                value={t.usuario || ''}
+                                onChange={(v) => guardarCampo(t.tareaid, 'usuario', v || null)}
+                                onClose={() => setEditando(null)}
+                                options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))]}
+                              />
+                            </span>
                           ) : t.usuario ? (
                             <span
                               className="tk-who"
