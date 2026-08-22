@@ -4,7 +4,7 @@ from .propietario import Propietario
 from .dispositivo import Dispositivo, Accesorio
 from .ticket import Ticket
 from .tarea import Tarea
-from .presupuesto import Presupuesto
+from .presupuesto import Presupuesto, ItemPresupuesto
 from .checklist import CheckList, Pregunta, Respuesta, PreguntaRespuesta
 from .ejecucion import Ejecucion, RespuestaIngresada
 from .estados import (

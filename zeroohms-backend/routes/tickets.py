@@ -10,7 +10,7 @@ from config.database import get_db
 from middleware.auth import get_current_user
 from models.ticket import Ticket
 from models.tarea import Tarea
-from models.presupuesto import Presupuesto
+from models.presupuesto import Presupuesto, ItemPresupuesto
 from models.foto import Foto
 from models.dispositivo import Dispositivo
 from models.propietario import Propietario
@@ -19,11 +19,10 @@ from models.ejecucion import Ejecucion, RespuestaIngresada
 from models.checklist import CheckList, Pregunta, Respuesta
 from schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketDetalle
 from schemas.tarea import TareaResponse
-from schemas.presupuesto import PresupuestoResponse
 from schemas.foto import FotoResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
-from routes.presupuestos import _get_estado_actual_pres
+from routes.presupuestos import _armar_response as _armar_response_presupuesto
 from services.webhook_service import generate_tracking_code, enviar_webhook_estado
 from services.pdf_service import generar_recibo_ingreso, generar_informe_tecnico
 from services.storage_service import borrar_objeto, thumb_key
@@ -194,14 +193,7 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
     ]
 
     presupuestos = [
-        PresupuestoResponse(
-            presupuestoid=p.presupuestoid,
-            tkid=p.tkid,
-            monto=float(p.monto),
-            fechacreacion=p.fechacreacion,
-            fechavalidez=p.fechavalidez,
-            estado_actual=_get_estado_actual_pres(db, p.presupuestoid),
-        )
+        _armar_response_presupuesto(db, p)
         for p in sorted(ticket.presupuestos, key=lambda p: p.fechacreacion or datetime.min)
     ]
 
@@ -416,6 +408,7 @@ def delete_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depe
     presupuesto_ids = [p.presupuestoid for p in db.query(Presupuesto).filter(Presupuesto.tkid == tkid).all()]
     if presupuesto_ids:
         db.query(EstadoPresupuesto).filter(EstadoPresupuesto.presupuestoid.in_(presupuesto_ids)).delete(synchronize_session=False)
+        db.query(ItemPresupuesto).filter(ItemPresupuesto.presupuestoid.in_(presupuesto_ids)).delete(synchronize_session=False)
     db.query(Presupuesto).filter(Presupuesto.tkid == tkid).delete()
 
     ejecucion_ids = [e.ejecucionid for e in db.query(Ejecucion).filter(Ejecucion.tkid == tkid).all()]
