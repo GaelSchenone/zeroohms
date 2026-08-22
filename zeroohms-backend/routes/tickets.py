@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
@@ -23,6 +24,7 @@ from schemas.foto import FotoResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
 from services.webhook_service import generate_tracking_code, enviar_webhook_estado
+from services.pdf_service import generar_recibo_ingreso, generar_informe_tecnico
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
@@ -291,6 +293,75 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
         fotos=fotos,
         ejecuciones=ejecuciones,
         historial_estados=historial,
+    )
+
+
+@router.get("/{tkid}/recibo")
+def recibo_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends(get_current_user)):
+    ticket = db.query(Ticket).filter(Ticket.tkid == tkid).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado")
+
+    dispositivo = ticket.dispositivo
+    propietario = dispositivo.propietario if dispositivo else None
+
+    pdf = generar_recibo_ingreso(
+        {
+            "tkid": ticket.tkid,
+            "codigoseguimiento": ticket.codigoseguimiento,
+            "fechacreacion": ticket.fechacreacion,
+            "descripcionproblema": ticket.descripcionproblema,
+        },
+        {
+            "nombre": propietario.nombre if propietario else None,
+            "apellido": propietario.apellido if propietario else None,
+            "dni": propietario.dni if propietario else None,
+            "telefono": propietario.telefono if propietario else None,
+        },
+        {
+            "marca": dispositivo.marca if dispositivo else None,
+            "modelo": dispositivo.modelo if dispositivo else None,
+            "numeroserie": dispositivo.numeroserie if dispositivo else None,
+        },
+    )
+    nombre_archivo = f"recibo-{ticket.codigoseguimiento or ticket.tkid}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{nombre_archivo}"'},
+    )
+
+
+@router.get("/{tkid}/informe")
+def informe_tecnico_ticket(tkid: int, db: Session = Depends(get_db), usuario: str = Depends(get_current_user)):
+    detalle = get_ticket(tkid, db, usuario)
+
+    pdf = generar_informe_tecnico(
+        {
+            "tkid": detalle.tkid,
+            "codigoseguimiento": detalle.codigoseguimiento,
+            "fechacreacion": detalle.fechacreacion,
+            "descripcionproblema": detalle.descripcionproblema,
+        },
+        {
+            "nombre": detalle.propietario_nombre,
+            "apellido": detalle.propietario_apellido,
+            "dni": detalle.propietario_dni,
+            "telefono": detalle.propietario_telefono,
+        },
+        {
+            "marca": detalle.dispositivo_marca,
+            "modelo": detalle.dispositivo_modelo,
+            "numeroserie": detalle.dispositivo_numeroserie,
+        },
+        [e.model_dump() for e in detalle.ejecuciones],
+        [p.model_dump() for p in detalle.presupuestos],
+    )
+    nombre_archivo = f"informe-{detalle.codigoseguimiento or detalle.tkid}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{nombre_archivo}"'},
     )
 
 

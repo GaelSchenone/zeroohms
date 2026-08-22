@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api } from '../api/client.js'
+import { api, apiBlob } from '../api/client.js'
 import { estadoClass, formatEstado } from '../utils/format.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
 import EstadoButtonRow from '../components/tickets/EstadoButtonRow.jsx'
@@ -97,6 +97,21 @@ export default function TicketDetail() {
       fetchTicket()
     } finally {
       setDeletingEj(null)
+    }
+  }
+
+  const [generandoPdf, setGenerandoPdf] = useState(null)
+
+  const abrirPdf = async (tipo) => {
+    setGenerandoPdf(tipo)
+    try {
+      const blob = await apiBlob(`/tickets/${id}/${tipo}`)
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank')
+    } catch (err) {
+      window.alert('No se pudo generar el PDF: ' + err.message)
+    } finally {
+      setGenerandoPdf(null)
     }
   }
 
@@ -201,8 +216,16 @@ export default function TicketDetail() {
               {ticket.codigoseguimiento || ''}
             </span>
             <button
+              className="adm-btn adm-btn--subtle"
+              style={{ marginLeft: 'auto' }}
+              onClick={() => abrirPdf('recibo')}
+              disabled={generandoPdf === 'recibo'}
+            >
+              {generandoPdf === 'recibo' ? 'Generando…' : 'Imprimir recibo'}
+            </button>
+            <button
               className="adm-btn adm-btn--ghost"
-              style={{ marginLeft: 'auto', color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' }}
+              style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' }}
               onClick={handleDeleteTicket}
             >
               Eliminar ticket
@@ -392,9 +415,19 @@ export default function TicketDetail() {
             </div>
 
             <div>
-              <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.75rem' }}>
-                Historial ({ejecuciones.length})
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', margin: 0 }}>
+                  Historial ({ejecuciones.length})
+                </h3>
+                <button
+                  type="button"
+                  className="adm-btn adm-btn--subtle adm-btn--sm"
+                  onClick={() => abrirPdf('informe')}
+                  disabled={generandoPdf === 'informe'}
+                >
+                  {generandoPdf === 'informe' ? 'Generando…' : 'Imprimir informe técnico'}
+                </button>
+              </div>
 
               {ordenadas.length === 0 ? (
                 <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>

@@ -12,6 +12,35 @@ export function clearToken() {
   localStorage.removeItem('token')
 }
 
+export async function apiBlob(path) {
+  const token = getToken()
+  const headers = {}
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, { headers })
+
+  if (res.status === 401) {
+    clearToken()
+    window.location.href = '/login'
+    throw new Error('Sesión expirada')
+  }
+
+  if (!res.ok) {
+    let mensaje = 'Error del servidor'
+    try {
+      const data = await res.json()
+      mensaje = data.detail || data.error || mensaje
+    } catch {
+      // la respuesta de error no era JSON
+    }
+    throw new Error(mensaje)
+  }
+
+  return res.blob()
+}
+
 export async function api(path, options = {}) {
   const { method = 'GET', body, headers: extraHeaders = {} } = options
 
