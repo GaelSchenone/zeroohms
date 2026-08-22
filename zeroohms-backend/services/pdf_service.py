@@ -4,20 +4,47 @@ Sin dependencias de sistema (reportlab dibuja directo sobre el canvas),
 pensado para imprimirse en A4 desde el navegador.
 """
 import io
+import os
 import textwrap
 from datetime import datetime
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.colors import HexColor, black, white
 from reportlab.pdfgen import canvas
+from reportlab.graphics import renderPDF
+from svglib.svglib import svg2rlg
 
 ACCENT = HexColor("#F0513B")
 GRIS = HexColor("#555555")
 GRIS_CLARO = HexColor("#999999")
 LINEA = HexColor("#CCCCCC")
+GRIS_CELDA = HexColor("#EFEFEF")
 
 PAGE_W, PAGE_H = A4
 MARGEN = 24
+
+_LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "logo_mono.svg")
+_logo_drawing = None
+
+
+def _logo():
+    global _logo_drawing
+    if _logo_drawing is None:
+        _logo_drawing = svg2rlg(_LOGO_PATH)
+    return _logo_drawing
+
+
+def _dibujar_logo(c, x, y_top, alto) -> float:
+    """Dibuja el isotipo con la altura dada, alineado arriba-izquierda en (x, y_top). Devuelve el ancho ocupado."""
+    logo = _logo()
+    escala = alto / logo.height
+    ancho = logo.width * escala
+    c.saveState()
+    c.translate(x, y_top - alto)
+    c.scale(escala, escala)
+    renderPDF.draw(logo, c, 0, 0)
+    c.restoreState()
+    return ancho
 
 
 def _money(value) -> str:
@@ -46,78 +73,119 @@ def _wrap(c, texto, x, y, max_chars, line_height, font="Helvetica", size=9):
     return y
 
 
+def _fila_grid(c, x, y, ancho, alto_fila, celdas):
+    """Dibuja una fila de celdas tipo formulario: borde, franja de etiqueta gris arriba y valor abajo.
+    celdas: lista de (etiqueta, valor, fraccion_de_ancho)."""
+    cx = x
+    for etiqueta, valor, frac in celdas:
+        w = ancho * frac
+        c.setStrokeColor(black)
+        c.setLineWidth(0.6)
+        c.rect(cx, y - alto_fila, w, alto_fila, stroke=1, fill=0)
+
+        c.setFillColor(GRIS_CELDA)
+        c.rect(cx, y - 11, w, 11, stroke=0, fill=1)
+        c.setStrokeColor(black)
+        c.line(cx, y - 11, cx + w, y - 11)
+
+        c.setFillColor(black)
+        c.setFont("Helvetica-Bold", 6.2)
+        c.drawString(cx + 5, y - 8, etiqueta.upper())
+        c.setFont("Helvetica", 9.5)
+        c.drawString(cx + 5, y - alto_fila + 7, str(valor) if valor not in (None, "") else "—")
+        cx += w
+    return y - alto_fila
+
+
 def _talon(c, y0, alto, ticket, propietario, dispositivo, etiqueta_copia, es_cliente):
     x = MARGEN
     ancho_util = PAGE_W - 2 * MARGEN
-    y = y0 + alto - 28
+    y = y0 + alto - 22
 
-    c.setFillColor(ACCENT)
-    c.setFont("Helvetica-Bold", 14)
-    c.drawString(x, y, "ZERO OHMS")
-    c.setFillColor(black)
-
-    c.setFont("Helvetica-Bold", 8)
-    badge_w = 90
-    c.setFillColor(HexColor("#111111"))
-    c.rect(x + ancho_util - badge_w, y - 4, badge_w, 16, fill=1, stroke=0)
-    c.setFillColor(white)
-    c.drawCentredString(x + ancho_util - badge_w / 2, y, etiqueta_copia)
-    c.setFillColor(black)
-
-    y -= 20
-    c.setFont("Helvetica", 10)
+    logo_alto = 22
+    ancho_logo = _dibujar_logo(c, x, y + 4, logo_alto)
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(x + ancho_logo + 8, y - 3, "ZERO OHMS")
+    c.setFont("Helvetica", 6.5)
     c.setFillColor(GRIS)
-    c.drawString(x, y, "Recibo de ingreso de equipo")
+    c.drawString(x + ancho_logo + 8, y - 12, "SERVICIO TÉCNICO DE REPARACIÓN")
     c.setFillColor(black)
 
-    y -= 10
-    c.setStrokeColor(LINEA)
-    c.line(x, y, x + ancho_util, y)
-    y -= 22
+    badge_w = 92
+    c.setFillColor(black)
+    c.rect(x + ancho_util - badge_w, y - 12, badge_w, 15, fill=1, stroke=0)
+    c.setFillColor(white)
+    c.setFont("Helvetica-Bold", 7.5)
+    c.drawCentredString(x + ancho_util - badge_w / 2, y - 8, etiqueta_copia)
+    c.setFillColor(black)
 
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(x, y, f"Código: {ticket.get('codigoseguimiento') or '—'}")
     y -= 26
-
-    c.setFont("Helvetica", 9)
-    c.drawString(x, y, f"Ticket #{ticket.get('tkid')}    ·    Ingreso: {_fecha(ticket.get('fechacreacion'))}")
-    y -= 20
-
-    nombre = " ".join(filter(None, [propietario.get("nombre"), propietario.get("apellido")])) or "—"
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(x, y, "Cliente")
-    y -= 13
-    c.setFont("Helvetica", 9)
-    c.drawString(x, y, f"{nombre}    ·    DNI {propietario.get('dni') or '—'}    ·    Tel. {propietario.get('telefono') or '—'}")
-    y -= 20
-
-    equipo = " ".join(filter(None, [dispositivo.get("marca"), dispositivo.get("modelo")])) or "—"
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(x, y, "Equipo")
-    y -= 13
-    c.setFont("Helvetica", 9)
-    c.drawString(x, y, f"{equipo}    ·    N° de serie: {dispositivo.get('numeroserie') or '—'}")
-    y -= 20
-
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(x, y, "Problema reportado")
-    y -= 13
-    y = _wrap(c, ticket.get("descripcionproblema"), x, y, 95, 12)
-    y -= 8
-
-    c.setStrokeColor(LINEA)
+    c.setLineWidth(1.2)
+    c.setStrokeColor(black)
     c.line(x, y, x + ancho_util, y)
+    c.setFont("Helvetica-Bold", 8)
+    c.drawString(x, y - 10, "RECIBO DE INGRESO DE EQUIPO")
+    c.setLineWidth(0.6)
     y -= 16
 
-    c.setFont("Helvetica", 8)
-    c.setFillColor(GRIS_CLARO)
+    marco_top = y
+
+    # Callout del código de seguimiento: la referencia con la que el cliente sigue su reparación.
+    alto_codigo = 30
+    c.rect(x, y - alto_codigo, ancho_util, alto_codigo, stroke=1, fill=0)
+    c.setFillColor(GRIS_CELDA)
+    c.rect(x, y - 11, ancho_util, 11, stroke=0, fill=1)
+    c.setStrokeColor(black)
+    c.line(x, y - 11, x + ancho_util, y - 11)
+    c.setFillColor(black)
+    c.setFont("Helvetica-Bold", 6.2)
+    c.drawString(x + 6, y - 8, "CÓDIGO DE SEGUIMIENTO")
+    c.setFont("Courier-Bold", 15)
+    c.drawString(x + 6, y - alto_codigo + 8, ticket.get("codigoseguimiento") or "—")
+    y -= alto_codigo
+
+    nombre = " ".join(filter(None, [propietario.get("nombre"), propietario.get("apellido")])) or "—"
+    equipo = " ".join(filter(None, [dispositivo.get("marca"), dispositivo.get("modelo")])) or "—"
+
+    y = _fila_grid(c, x, y, ancho_util, 26, [
+        ("N° de ticket", f"#{ticket.get('tkid')}", 0.35),
+        ("Fecha de ingreso", _fecha(ticket.get("fechacreacion")), 0.65),
+    ])
+    y = _fila_grid(c, x, y, ancho_util, 26, [("Cliente", nombre, 1.0)])
+    y = _fila_grid(c, x, y, ancho_util, 26, [
+        ("DNI", propietario.get("dni"), 0.45),
+        ("Teléfono", propietario.get("telefono"), 0.55),
+    ])
+    y = _fila_grid(c, x, y, ancho_util, 26, [("Equipo", equipo, 1.0)])
+    y = _fila_grid(c, x, y, ancho_util, 26, [("N° de serie", dispositivo.get("numeroserie"), 1.0)])
+
+    alto_problema = 46
+    c.rect(x, y - alto_problema, ancho_util, alto_problema, stroke=1, fill=0)
+    c.setFillColor(GRIS_CELDA)
+    c.rect(x, y - 11, ancho_util, 11, stroke=0, fill=1)
+    c.setStrokeColor(black)
+    c.line(x, y - 11, x + ancho_util, y - 11)
+    c.setFillColor(black)
+    c.setFont("Helvetica-Bold", 6.2)
+    c.drawString(x + 6, y - 8, "PROBLEMA REPORTADO")
+    _wrap(c, ticket.get("descripcionproblema"), x + 6, y - 21, 100, 10, size=8.5)
+    y -= alto_problema
+
+    # Marco exterior que enmarca toda la grilla, como un comprobante.
+    c.setLineWidth(1.1)
+    c.rect(x, y, ancho_util, marco_top - y, stroke=1, fill=0)
+    c.setLineWidth(0.6)
+
+    y -= 13
+    c.setFont("Helvetica", 7.5)
+    c.setFillColor(GRIS)
     if es_cliente:
         c.drawString(x, y, "Conservá este comprobante para retirar tu equipo. Podés seguir tu reparación en")
-        y -= 11
+        y -= 10
         c.drawString(x, y, "zeroohms.com.ar/tracking con el código de arriba.")
     else:
         c.drawString(x, y, "Firma y aclaración del cliente:")
-        c.line(x + 170, y - 2, x + ancho_util, y - 2)
+        c.line(x + 150, y - 2, x + ancho_util, y - 2)
     c.setFillColor(black)
 
 
@@ -145,16 +213,16 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
     c = canvas.Canvas(buf, pagesize=A4)
     x = MARGEN
     ancho_util = PAGE_W - 2 * MARGEN
-    y = PAGE_H - MARGEN - 20
+    y = PAGE_H - MARGEN - 6
 
-    c.setFillColor(ACCENT)
+    ancho_logo = _dibujar_logo(c, x, y, 24)
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(x, y, "ZERO OHMS")
-    c.setFillColor(black)
-    y -= 20
-    c.setFont("Helvetica", 11)
+    c.drawString(x + ancho_logo + 8, y - 8, "ZERO OHMS")
+    c.setFont("Helvetica", 9)
     c.setFillColor(GRIS)
-    c.drawString(x, y, "Informe técnico y presupuesto")
+    c.drawString(x + ancho_logo + 8, y - 19, "Informe técnico y presupuesto")
+    c.setFillColor(black)
+    y -= 26
     c.setFillColor(black)
     y -= 8
     c.setStrokeColor(LINEA)
