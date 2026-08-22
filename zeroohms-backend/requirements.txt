@@ -9,3 +9,6 @@ pydantic-settings
 httpx
 reportlab
 svglib
+minio
+pillow
+python-multipart
