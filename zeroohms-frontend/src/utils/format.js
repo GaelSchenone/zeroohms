@@ -18,8 +18,10 @@ const LABELS = {
   'completada': 'Completada',
   'completado': 'Completado',
   'borrador': 'Borrador',
+  'pendiente_aprobacion': 'Pendiente de aprobación',
   'aprobado': 'Aprobado',
   'rechazado': 'Rechazado',
+  'vencido': 'Vencido',
 }
 
 export function formatEstado(estado) {

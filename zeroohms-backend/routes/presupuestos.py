@@ -24,6 +24,13 @@ def _get_estado_actual_pres(db: Session, presupuestoid: int) -> str | None:
     return last[1].posestado if last else None
 
 
+@router.get("/estados", response_model=list[dict])
+def get_estados_presupuesto(db: Session = Depends(get_db), _usuario: str = Depends(get_current_user)):
+    """Devuelve todos los estados posibles para presupuestos (catálogo PosEstadosPresupuestos)."""
+    estados = db.query(PosEstadoPresupuesto).order_by(PosEstadoPresupuesto.posestado_pid).all()
+    return [{"id": e.posestado_pid, "nombre": e.posestado} for e in estados]
+
+
 @router.get("", response_model=list[PresupuestoResponse])
 def list_presupuestos(
     tkid: int | None = None,
@@ -97,6 +104,7 @@ def delete_presupuesto(
     pres = db.query(Presupuesto).filter(Presupuesto.presupuestoid == presupuestoid).first()
     if not pres:
         raise HTTPException(status_code=404, detail="Presupuesto no encontrado")
+    db.query(EstadoPresupuesto).filter(EstadoPresupuesto.presupuestoid == presupuestoid).delete()
     db.delete(pres)
     db.commit()
     return {"message": f"Presupuesto {presupuestoid} eliminado"}

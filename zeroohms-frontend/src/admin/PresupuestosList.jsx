@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react'
 import { api } from '../api/client.js'
-import { formatEstado, estadoClass } from '../utils/format.js'
-
-const ESTADOS = [
-  { id: 1, nombre: 'borrador' },
-  { id: 2, nombre: 'aprobado' },
-  { id: 3, nombre: 'rechazado' },
-]
+import { formatEstado, estadoClass, formatMoney } from '../utils/format.js'
+import Combobox from '../components/tickets/Combobox.jsx'
 
 export default function PresupuestosList() {
   const [presupuestos, setPresupuestos] = useState([])
+  const [estados, setEstados] = useState([])
   const [loading, setLoading] = useState(true)
   const [filterTkId, setFilterTkId] = useState('')
   const [changing, setChanging] = useState(null)
@@ -26,6 +22,10 @@ export default function PresupuestosList() {
   }
 
   useEffect(fetchPresupuestos, [filterTkId])
+
+  useEffect(() => {
+    api('/presupuestos/estados').then(setEstados).catch(() => setEstados([]))
+  }, [])
 
   const handleStateChange = async (presupuestoid, posestadoId) => {
     setChanging(presupuestoid)
@@ -50,8 +50,6 @@ export default function PresupuestosList() {
       setDeleting(null)
     }
   }
-
-  const formatPrice = (v) => v == null ? '—' : '$' + v.toLocaleString('es-AR')
 
   return (
     <div className="adm-panel">
@@ -91,7 +89,7 @@ export default function PresupuestosList() {
                 <tr key={p.presupuestoid}>
                   <td className="adm-td-id">#{p.presupuestoid}</td>
                   <td>#{p.tkid}</td>
-                  <td style={{ fontWeight: 600 }}>{formatPrice(p.monto)}</td>
+                  <td style={{ fontWeight: 600 }}>{formatMoney(p.monto)}</td>
                   <td>{p.fechacreacion ? new Date(p.fechacreacion).toLocaleDateString('es-AR') : '—'}</td>
                   <td>{p.fechavalidez ? new Date(p.fechavalidez).toLocaleDateString('es-AR') : '—'}</td>
                   <td>
@@ -100,18 +98,16 @@ export default function PresupuestosList() {
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                      {ESTADOS.filter((e) => e.nombre !== p.estado_actual).map((e) => (
-                        <button
-                          key={e.id}
-                          className="adm-btn adm-btn--ghost"
-                          style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem' }}
-                          disabled={changing === p.presupuestoid}
-                          onClick={() => handleStateChange(p.presupuestoid, e.id)}
-                        >
-                          {formatEstado(e.nombre)}
-                        </button>
-                      ))}
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Combobox
+                        placeholder="Marcar como…"
+                        value={null}
+                        disabled={changing === p.presupuestoid}
+                        onChange={(id) => handleStateChange(p.presupuestoid, Number(id))}
+                        options={estados
+                          .filter((e) => e.nombre !== p.estado_actual)
+                          .map((e) => ({ value: e.id, label: formatEstado(e.nombre) }))}
+                      />
                       <button
                         className="adm-btn adm-btn--ghost"
                         style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#f87171', borderColor: 'rgba(239,68,68,0.4)' }}

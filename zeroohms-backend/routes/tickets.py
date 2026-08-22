@@ -23,6 +23,7 @@ from schemas.presupuesto import PresupuestoResponse
 from schemas.foto import FotoResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
+from routes.presupuestos import _get_estado_actual_pres
 from services.webhook_service import generate_tracking_code, enviar_webhook_estado
 from services.pdf_service import generar_recibo_ingreso, generar_informe_tecnico
 
@@ -198,8 +199,9 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
             monto=float(p.monto),
             fechacreacion=p.fechacreacion,
             fechavalidez=p.fechavalidez,
+            estado_actual=_get_estado_actual_pres(db, p.presupuestoid),
         )
-        for p in ticket.presupuestos
+        for p in sorted(ticket.presupuestos, key=lambda p: p.fechacreacion or datetime.min)
     ]
 
     fotos = [

@@ -537,6 +537,11 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+.adm-status--pendiente-aprobacion{
+  background: rgba(59, 130, 246, 0.15);
+  color: #7ab0ff;
+}
+
 .adm-status--aprobado{
   background: rgba(34, 197, 94, 0.15);
   color: #6ee79f;
@@ -545,6 +550,11 @@
 .adm-status--rechazado{
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
+}
+
+.adm-status--vencido{
+  background: rgba(245, 158, 11, 0.15);
+  color: #f5c46a;
 }
 
 .adm-status--ticket-creado,

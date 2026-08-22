@@ -18,7 +18,3 @@ class PresupuestoResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class CambioEstadoPresupuesto(BaseModel):
-    posestado_pid: int
