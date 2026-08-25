@@ -24,7 +24,7 @@ from schemas.accesorio import AccesorioResponse
 from schemas.estados import EstadoResponse, CambioEstado
 from schemas.checklist import EjecucionResponse, RespuestaIngresadaResponse
 from routes.presupuestos import _armar_response as _armar_response_presupuesto
-from services.webhook_service import generate_tracking_code, enviar_webhook_estado
+from services.webhook_service import generate_tracking_code, enviar_webhook_estado, send_webhook
 from services.pdf_service import generar_recibo_ingreso, generar_informe_tecnico
 from services.storage_service import borrar_objeto, thumb_key
 
@@ -104,6 +104,7 @@ def list_tickets(
 @router.post("", response_model=TicketResponse, status_code=201)
 def create_ticket(
     body: TicketCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
@@ -132,6 +133,25 @@ def create_ticket(
 
     db.commit()
     db.refresh(ticket)
+
+    dispositivo = ticket.dispositivo
+    propietario = dispositivo.propietario if dispositivo else None
+    equipo = " ".join(filter(None, [dispositivo.marca if dispositivo else None, dispositivo.modelo if dispositivo else None])) or None
+
+    background_tasks.add_task(
+        send_webhook,
+        "ticket-creado",
+        {
+            "tkid": ticket.tkid,
+            "codigo_seguimiento": ticket.codigoseguimiento,
+            "cliente_nombre": propietario.nombre if propietario else None,
+            "cliente_apellido": propietario.apellido if propietario else None,
+            "cliente_email": propietario.email if propietario else None,
+            "cliente_telefono": propietario.telefono if propietario else None,
+            "equipo": equipo,
+            "tracking_url": f"https://zeroohms.com.ar/tracking?c={ticket.codigoseguimiento}",
+        },
+    )
 
     return TicketResponse(
         tkid=ticket.tkid,
@@ -503,6 +523,7 @@ def cambiar_estado(
     equipo = " ".join(filter(None, [dispositivo.marca if dispositivo else None, dispositivo.modelo if dispositivo else None])) or None
 
     presupuesto_monto = None
+    presupuesto_items = []
     if pos_estado.posestado == "esperando_aprobacion":
         ultimo_presupuesto = (
             db.query(Presupuesto)
@@ -512,6 +533,15 @@ def cambiar_estado(
         )
         if ultimo_presupuesto:
             presupuesto_monto = float(ultimo_presupuesto.monto)
+            presupuesto_items = [
+                {
+                    "tipo": it.tipo.value if hasattr(it.tipo, "value") else it.tipo,
+                    "descripcion": it.descripcion,
+                    "cantidad": float(it.cantidad),
+                    "preciounitario": float(it.preciounitario),
+                }
+                for it in ultimo_presupuesto.items
+            ]
 
     background_tasks.add_task(
         enviar_webhook_estado,
@@ -530,6 +560,7 @@ def cambiar_estado(
             "cliente_telefono": propietario.telefono if propietario else None,
             "equipo": equipo,
             "presupuesto_monto": presupuesto_monto,
+            "presupuesto_items": presupuesto_items,
             "tracking_url": f"https://zeroohms.com.ar/tracking?c={ticket.codigoseguimiento}",
         },
     )
