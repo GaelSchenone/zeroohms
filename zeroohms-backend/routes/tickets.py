@@ -498,6 +498,21 @@ def cambiar_estado(
     db.add(nuevo_estado)
     db.commit()
 
+    dispositivo = ticket.dispositivo
+    propietario = dispositivo.propietario if dispositivo else None
+    equipo = " ".join(filter(None, [dispositivo.marca if dispositivo else None, dispositivo.modelo if dispositivo else None])) or None
+
+    presupuesto_monto = None
+    if pos_estado.posestado == "esperando_aprobacion":
+        ultimo_presupuesto = (
+            db.query(Presupuesto)
+            .filter(Presupuesto.tkid == tkid)
+            .order_by(Presupuesto.fechacreacion.desc())
+            .first()
+        )
+        if ultimo_presupuesto:
+            presupuesto_monto = float(ultimo_presupuesto.monto)
+
     background_tasks.add_task(
         enviar_webhook_estado,
         tkid,
@@ -508,6 +523,14 @@ def cambiar_estado(
             "codigo_seguimiento": ticket.codigoseguimiento,
             "estado_anterior": estado_anterior,
             "estado_nuevo": pos_estado.posestado,
+            "estado_nuevo_descripcion": pos_estado.descripcion,
+            "cliente_nombre": propietario.nombre if propietario else None,
+            "cliente_apellido": propietario.apellido if propietario else None,
+            "cliente_email": propietario.email if propietario else None,
+            "cliente_telefono": propietario.telefono if propietario else None,
+            "equipo": equipo,
+            "presupuesto_monto": presupuesto_monto,
+            "tracking_url": f"https://zeroohms.com.ar/tracking?c={ticket.codigoseguimiento}",
         },
     )
 
