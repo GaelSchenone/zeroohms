@@ -65,7 +65,7 @@ export default function ChecklistCreate() {
           },
         })
       }
-      navigate(`/admin/checklists/${cl.checklistid}`)
+      navigate(`/checklists/${cl.checklistid}`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -145,7 +145,7 @@ export default function ChecklistCreate() {
           <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
             {saving ? 'Creando…' : 'Crear checklist'}
           </button>
-          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/admin/checklists')}>
+          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/checklists')}>
             Cancelar
           </button>
         </div>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" id="favicon" type="image/svg+xml" href="/logos/favicons/favicon_light.svg" />
+
+    <script>
+      // Cambia el favicon segun el tema del sistema. El atributo media en <link>
+      // no funciona en Safari y el navegador cachea los favicons con fuerza.
+      const favicon = document.getElementById("favicon");
+      const dark = matchMedia("(prefers-color-scheme: dark)");
+      const apply = () => {
+        favicon.href = `/logos/favicons/favicon_${dark.matches ? "dark" : "light"}.svg?v=2`;
+      };
+      dark.addEventListener("change", apply);
+      apply();
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Zero Ohms | Admin</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

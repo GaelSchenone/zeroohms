@@ -16,7 +16,7 @@ export default function Login() {
     setLoading(true)
     try {
       await login(usuario, clave)
-      navigate('/admin')
+      navigate('/')
     } catch (err) {
       setError(err.message || 'Usuario o contraseña incorrectos.')
     } finally {

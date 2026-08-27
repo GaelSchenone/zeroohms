@@ -10,29 +10,29 @@ const NAV_GROUPS = [
   {
     label: 'General',
     items: [
-      { label: 'Resumen', icon: Home, to: '/admin' },
+      { label: 'Resumen', icon: Home, to: '/' },
     ],
   },
   {
     label: 'Operaciones',
     items: [
-      { label: 'Tickets', icon: Inbox, to: '/admin/tickets' },
-      { label: 'Tareas', icon: SettingsCog2, to: '/admin/tareas' },
-      { label: 'Presupuestos', icon: Settings2, to: '/admin/presupuestos' },
-      { label: 'Checklists', icon: ClipboardNote, to: '/admin/checklists' },
+      { label: 'Tickets', icon: Inbox, to: '/tickets' },
+      { label: 'Tareas', icon: SettingsCog2, to: '/tareas' },
+      { label: 'Presupuestos', icon: Settings2, to: '/presupuestos' },
+      { label: 'Checklists', icon: ClipboardNote, to: '/checklists' },
     ],
   },
   {
     label: 'Contactos',
     items: [
-      { label: 'Clientes', icon: Users, to: '/admin/clientes' },
-      { label: 'Usuarios', icon: Users, to: '/admin/usuarios' },
+      { label: 'Clientes', icon: Users, to: '/clientes' },
+      { label: 'Usuarios', icon: Users, to: '/usuarios' },
     ],
   },
   {
     label: 'Sistema',
     items: [
-      { label: 'Ajustes', icon: Settings2, to: '/admin/ajustes' },
+      { label: 'Ajustes', icon: Settings2, to: '/ajustes' },
     ],
   },
 ]
@@ -55,7 +55,7 @@ export default function AdminLayout() {
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      navigate(`/admin/tickets?search=${encodeURIComponent(searchQuery.trim())}`)
+      navigate(`/tickets?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
     }
   }
@@ -74,8 +74,8 @@ export default function AdminLayout() {
               <span className="adm-nav-group-label">{group.label}</span>
               {group.items.map((item) => {
                 const Icon = item.icon
-                const isActive = item.to === '/admin'
-                  ? location.pathname === '/admin'
+                const isActive = item.to === '/'
+                  ? location.pathname === '/'
                   : location.pathname.startsWith(item.to)
                 return (
                   <NavLink

@@ -26,7 +26,7 @@ export default function ChecklistRun() {
         preg.forEach((p) => { init[p.preguntaid] = { respuestaid: '', observacion: '' } })
         setRespuestas(init)
       })
-      .catch(() => navigate('/admin/checklists'))
+      .catch(() => navigate('/checklists'))
       .finally(() => setLoading(false))
   }, [id, navigate])
 
@@ -87,10 +87,10 @@ export default function ChecklistRun() {
           Las respuestas se guardaron correctamente para el ticket #{tkid}.
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-          <button className="adm-btn adm-btn--primary" onClick={() => navigate(`/admin/tickets/${tkid}`)}>
+          <button className="adm-btn adm-btn--primary" onClick={() => navigate(`/tickets/${tkid}`)}>
             Ver ticket
           </button>
-          <button className="adm-btn adm-btn--ghost" onClick={() => navigate('/admin/checklists')}>
+          <button className="adm-btn adm-btn--ghost" onClick={() => navigate('/checklists')}>
             Volver a checklists
           </button>
         </div>
@@ -154,7 +154,7 @@ export default function ChecklistRun() {
           <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
             {saving ? 'Enviando…' : 'Enviar checklist'}
           </button>
-          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/admin/checklists')}>
+          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/checklists')}>
             Cancelar
           </button>
         </div>

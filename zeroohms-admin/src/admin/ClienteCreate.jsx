@@ -32,7 +32,7 @@ export default function ClienteCreate() {
           observaciones: form.observaciones.trim() || null,
         },
       })
-      navigate(`/admin/clientes/${data.dni}`)
+      navigate(`/clientes/${data.dni}`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -84,7 +84,7 @@ export default function ClienteCreate() {
           <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
             {saving ? 'Creando…' : 'Crear cliente'}
           </button>
-          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/admin/clientes')}>
+          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/clientes')}>
             Cancelar
           </button>
         </div>

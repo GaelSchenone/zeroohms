@@ -33,7 +33,7 @@ export default function TicketsList() {
     <div className="adm-panel">
       <div className="adm-panel-head">
         <h2>Tickets</h2>
-        <Link to="/admin/tickets/nuevo" className="adm-btn adm-btn--primary">
+        <Link to="/tickets/nuevo" className="adm-btn adm-btn--primary">
           <Plus size={16} /> Nuevo ticket
         </Link>
       </div>
@@ -113,7 +113,7 @@ export default function TicketsList() {
                       )}
                     </td>
                     <td>
-                      <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
+                      <Link to={`/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
                         Ver
                       </Link>
                     </td>

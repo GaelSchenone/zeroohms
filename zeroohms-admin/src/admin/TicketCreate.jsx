@@ -179,7 +179,7 @@ export default function TicketCreate() {
             <a className="adm-btn adm-btn--primary" href={`/tracking?c=${creado.codigoseguimiento}`} target="_blank" rel="noreferrer">
               Seguir reparación
             </a>
-            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => navigate(`/admin/tickets/${creado.tkid}`)}>
+            <button type="button" className="adm-btn adm-btn--ghost" onClick={() => navigate(`/tickets/${creado.tkid}`)}>
               Ver ticket
             </button>
           </div>
@@ -335,7 +335,7 @@ export default function TicketCreate() {
           <button className="adm-btn adm-btn--primary" type="submit" disabled={saving}>
             {saving ? 'Creando…' : 'Crear ticket'}
           </button>
-          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/admin/tickets')}>
+          <button className="adm-btn adm-btn--ghost" type="button" onClick={() => navigate('/tickets')}>
             Cancelar
           </button>
         </div>

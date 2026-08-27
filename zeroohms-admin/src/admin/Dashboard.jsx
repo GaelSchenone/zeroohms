@@ -175,10 +175,10 @@ export default function Dashboard() {
           <p className="adm-dash-subtitle">{today} · así viene el taller hoy</p>
         </div>
         <div className="adm-dash-header-actions">
-          <Link to="/admin/clientes/nuevo" className="adm-btn adm-btn--subtle">
+          <Link to="/clientes/nuevo" className="adm-btn adm-btn--subtle">
             <Users size={16} /> Nuevo cliente
           </Link>
-          <Link to="/admin/tickets/nuevo" className="adm-btn adm-btn--primary">
+          <Link to="/tickets/nuevo" className="adm-btn adm-btn--primary">
             <Plus size={16} /> Nuevo ticket
           </Link>
         </div>
@@ -281,7 +281,7 @@ export default function Dashboard() {
             <div className="adm-panel-head">
               <h2><Inbox size={20} /> Tickets recientes</h2>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Link to="/admin/tickets" className="adm-btn adm-btn--ghost adm-btn--sm">
+                <Link to="/tickets" className="adm-btn adm-btn--ghost adm-btn--sm">
                   Ver todos
                 </Link>
               </div>
@@ -324,7 +324,7 @@ export default function Dashboard() {
                           )}
                         </td>
                         <td>
-                          <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost adm-btn--sm">
+                          <Link to={`/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost adm-btn--sm">
                             Ver
                           </Link>
                         </td>
@@ -371,7 +371,7 @@ export default function Dashboard() {
             ) : (
               <div className="adm-attention-list">
                 {ticketsEstancados.length > 0 && (
-                  <Link to="/admin/tickets" className="adm-attention-item adm-attention-item--hot">
+                  <Link to="/tickets" className="adm-attention-item adm-attention-item--hot">
                     <span className="adm-attention-icon adm-attention-icon--hot"><Clock size={16} /></span>
                     <span className="adm-attention-text">
                       <strong>Tickets estancados</strong>
@@ -382,7 +382,7 @@ export default function Dashboard() {
                   </Link>
                 )}
                 {stats.esperandoAprobacion > 0 && (
-                  <Link to="/admin/tickets" className="adm-attention-item">
+                  <Link to="/tickets" className="adm-attention-item">
                     <span className="adm-attention-icon"><Clock size={16} /></span>
                     <span className="adm-attention-text">
                       <strong>Tickets esperando aprobación</strong>
@@ -393,7 +393,7 @@ export default function Dashboard() {
                   </Link>
                 )}
                 {stats.tareasPendientes > 0 && (
-                  <Link to="/admin/tareas" className="adm-attention-item">
+                  <Link to="/tareas" className="adm-attention-item">
                     <span className="adm-attention-icon"><SquareAlert size={16} /></span>
                     <span className="adm-attention-text">
                       <strong>Tareas pendientes</strong>
@@ -404,7 +404,7 @@ export default function Dashboard() {
                   </Link>
                 )}
                 {stats.presupuestosPendientes > 0 && (
-                  <Link to="/admin/presupuestos" className="adm-attention-item">
+                  <Link to="/presupuestos" className="adm-attention-item">
                     <span className="adm-attention-icon"><Wallet size={16} /></span>
                     <span className="adm-attention-text">
                       <strong>Presupuestos en borrador</strong>
@@ -443,19 +443,19 @@ export default function Dashboard() {
           <div className="adm-panel">
             <h2>Accesos rápidos</h2>
             <div className="adm-quick-grid">
-              <Link to="/admin/tickets/nuevo" className="adm-quick-action">
+              <Link to="/tickets/nuevo" className="adm-quick-action">
                 <Plus size={18} />
                 <span>Nuevo ticket</span>
               </Link>
-              <Link to="/admin/clientes/nuevo" className="adm-quick-action">
+              <Link to="/clientes/nuevo" className="adm-quick-action">
                 <Users size={18} />
                 <span>Nuevo cliente</span>
               </Link>
-              <Link to="/admin/checklists/nueva" className="adm-quick-action">
+              <Link to="/checklists/nueva" className="adm-quick-action">
                 <ClipboardNote size={18} />
                 <span>Checklist</span>
               </Link>
-              <Link to="/admin/ajustes" className="adm-quick-action">
+              <Link to="/ajustes" className="adm-quick-action">
                 <Settings2 size={18} />
                 <span>Ajustes</span>
               </Link>

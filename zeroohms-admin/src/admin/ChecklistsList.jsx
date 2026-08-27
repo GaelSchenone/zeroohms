@@ -34,7 +34,7 @@ export default function ChecklistsList() {
     <div className="adm-panel">
       <div className="adm-panel-head">
         <h2>Checklists</h2>
-        <Link to="/admin/checklists/nueva" className="adm-btn adm-btn--primary">
+        <Link to="/checklists/nueva" className="adm-btn adm-btn--primary">
           <Plus size={16} /> Nueva checklist
         </Link>
       </div>
@@ -56,7 +56,7 @@ export default function ChecklistsList() {
                 <td>{c.nombre}</td>
                 <td>{c.descripcion || '—'}</td>
                 <td style={{ display: 'flex', gap: '0.35rem' }}>
-                  <Link to={`/admin/checklists/${c.checklistid}`} className="adm-btn adm-btn--ghost" style={{ fontSize: '0.8rem' }}>
+                  <Link to={`/checklists/${c.checklistid}`} className="adm-btn adm-btn--ghost" style={{ fontSize: '0.8rem' }}>
                     Ver / Editar
                   </Link>
                   <button

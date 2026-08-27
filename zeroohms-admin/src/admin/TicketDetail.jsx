@@ -53,7 +53,7 @@ export default function TicketDetail() {
     setLoading(true)
     api(`/tickets/${id}`)
       .then(setTicket)
-      .catch(() => navigate('/admin/tickets'))
+      .catch(() => navigate('/tickets'))
       .finally(() => setLoading(false))
     api('/checklists').then(setChecklists).catch(() => setChecklists([]))
   }, [id, navigate])
@@ -62,7 +62,7 @@ export default function TicketDetail() {
     setLoading(true)
     api(`/tickets/${id}`)
       .then(setTicket)
-      .catch(() => navigate('/admin/tickets'))
+      .catch(() => navigate('/tickets'))
       .finally(() => setLoading(false))
   }
 
@@ -120,7 +120,7 @@ export default function TicketDetail() {
     if (!window.confirm('¿Eliminar este ticket? Esta acción no se puede deshacer.')) return
     try {
       await api(`/tickets/${id}`, { method: 'DELETE' })
-      navigate('/admin/tickets')
+      navigate('/tickets')
     } catch (err) {
       window.alert('Error: ' + err.message)
     }
@@ -207,7 +207,7 @@ export default function TicketDetail() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <nav className="adm-crumb">
-        <Link to="/admin/tickets">Tickets</Link>
+        <Link to="/tickets">Tickets</Link>
         <span>›</span>
         <strong>#{ticket.tkid}</strong>
       </nav>

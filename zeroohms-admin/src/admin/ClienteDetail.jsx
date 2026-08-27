@@ -36,7 +36,7 @@ export default function ClienteDetail() {
         setDispositivos(d)
         setTickets(t)
       })
-      .catch(() => navigate('/admin/clientes'))
+      .catch(() => navigate('/clientes'))
       .finally(() => setLoading(false))
   }, [dni, navigate])
 
@@ -69,7 +69,7 @@ export default function ClienteDetail() {
     if (!window.confirm('¿Eliminar este cliente? Solo se puede si no tiene tickets asociados.')) return
     try {
       await api(`/clientes/${dni}`, { method: 'DELETE' })
-      navigate('/admin/clientes')
+      navigate('/clientes')
     } catch (err) {
       window.alert('Error: ' + err.message)
     }
@@ -232,7 +232,7 @@ export default function ClienteDetail() {
                     <td>{t.codigoseguimiento || '—'}</td>
                     <td>{t.fechacreacion ? new Date(t.fechacreacion).toLocaleDateString('es-AR') : '—'}</td>
                     <td>
-                      <Link to={`/admin/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
+                      <Link to={`/tickets/${t.tkid}`} className="adm-btn adm-btn--ghost">
                         Ver
                       </Link>
                     </td>

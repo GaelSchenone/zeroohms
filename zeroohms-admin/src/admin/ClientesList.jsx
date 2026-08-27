@@ -22,7 +22,7 @@ export default function ClientesList() {
     <div className="adm-panel">
       <div className="adm-panel-head">
         <h2>Clientes</h2>
-        <Link to="/admin/clientes/nuevo" className="adm-btn adm-btn--primary">
+        <Link to="/clientes/nuevo" className="adm-btn adm-btn--primary">
           <Plus size={16} /> Nuevo cliente
         </Link>
       </div>
@@ -59,7 +59,7 @@ export default function ClientesList() {
                   <td>{c.email || '—'}</td>
                   <td>{c.telefono || '—'}</td>
                   <td>
-                    <Link to={`/admin/clientes/${c.dni}`} className="adm-btn adm-btn--ghost">
+                    <Link to={`/clientes/${c.dni}`} className="adm-btn adm-btn--ghost">
                       Ver
                     </Link>
                   </td>

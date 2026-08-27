@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@font-face {
+  font-family: 'NType82';
+  src: url('./assets/fonts/NType82/NType82-Regular.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+html, body, #root {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, p, b {
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+}
+
+a {
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  color: #fff;
+}

@@ -25,7 +25,7 @@ export default function ChecklistEdit() {
         if (cl) { setNombre(cl.nombre); setDescripcion(cl.descripcion || '') }
         setPreguntas(preg)
       })
-      .catch(() => navigate('/admin/checklists'))
+      .catch(() => navigate('/checklists'))
       .finally(() => setLoading(false))
   }, [id, navigate])
 
