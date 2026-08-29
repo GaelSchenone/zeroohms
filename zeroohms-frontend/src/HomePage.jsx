@@ -6,9 +6,10 @@ import Header from "./components/homepage/Header/Header";
 import Button from "./components/Button/Button";
 import YoutubeCarousel from "./components/homepage/YoutubeCarousel";
 import { ComputerSharp, TabletSharp, GpuSharp, CpuSharp, SettingsCog2, MemoryStickSharp } from 'pixelarticons/react'
-import { FaInstagram, FaYoutube } from 'react-icons/fa'
+import { FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa'
 
 const EMAIL = 'contacto@zeroohms.com.ar'
+const WHATSAPP = 'https://wa.me/5491124769779'
 
 function HomePage() {
   const navigate = useNavigate()
@@ -117,9 +118,10 @@ function HomePage() {
 
         <section id="contacto" className="hm homepage-contact">
           <h2>¡Contactanos!</h2>
-          <p>Escribinos por Instagram o por email y te respondemos a la brevedad.</p>
+          <p>Escribinos por WhatsApp, Instagram o por email y te respondemos a la brevedad.</p>
           <div className="contact-actions">
-            <a className="contact-button contact-button--primary" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">Escribirnos por Instagram</a>
+            <a className="contact-button contact-button--primary" href={WHATSAPP} target="_blank" rel="noreferrer">Escribirnos por WhatsApp</a>
+            <a className="contact-button" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">Escribirnos por Instagram</a>
             <a className="contact-button" onClick={handleCopyEmail}>{copied ? '¡Email copiado!' : 'Copiar dirección de Email'}</a>
           </div>
         </section>
@@ -128,6 +130,7 @@ function HomePage() {
           <div className="footer-brand">
             <img src="/logos/imagotipo.svg" alt="Zero Ohms" />
             <div className="footer-socials">
+              <a href={WHATSAPP} target="_blank" rel="noreferrer" aria-label="WhatsApp"><FaWhatsapp size={32} /></a>
               <a href="https://www.instagram.com/zeroohms__/" target="_blank" rel="noreferrer" aria-label="Instagram"><FaInstagram size={32} /></a>
               <a href="https://www.youtube.com/@zeroohms_tech" target="_blank" rel="noreferrer" aria-label="YouTube"><FaYoutube size={32} /></a>
             </div>
@@ -142,9 +145,9 @@ function HomePage() {
           </nav>
           <div className="footer-column">
             <strong>Redes sociales</strong>
+            <a href={WHATSAPP} target="_blank" rel="noreferrer">WhatsApp</a>
             <a href="https://www.instagram.com/zeroohms__/" target="_blank" rel="noreferrer">Instagram</a>
             <a href="https://www.youtube.com/@zeroohms_tech" target="_blank" rel="noreferrer">Youtube</a>
-            
           </div>
           <small>Sitio desarrollado por <a href="https://sashagala.com.ar" target="_blank" rel="noreferrer">sashagala studio</a></small>
         </footer>
