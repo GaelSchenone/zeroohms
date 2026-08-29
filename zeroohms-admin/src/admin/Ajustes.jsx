@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { cambiarPassword } from '../api/auth.js'
 import { iniciarConexionGoogle, estadoConexionGoogle, desconectarGoogle } from '../api/google.js'
 
 export default function Ajustes() {
@@ -7,6 +8,13 @@ export default function Ajustes() {
   const [google, setGoogle] = useState(null)
   const [loadingGoogle, setLoadingGoogle] = useState(true)
   const [aviso, setAviso] = useState('')
+
+  const [claveActual, setClaveActual] = useState('')
+  const [claveNueva, setClaveNueva] = useState('')
+  const [claveConfirmar, setClaveConfirmar] = useState('')
+  const [guardandoClave, setGuardandoClave] = useState(false)
+  const [errorClave, setErrorClave] = useState('')
+  const [okClave, setOkClave] = useState('')
 
   useEffect(() => {
     estadoConexionGoogle()
@@ -40,6 +48,28 @@ export default function Ajustes() {
     }
   }
 
+  const guardarClave = async (e) => {
+    e.preventDefault()
+    setErrorClave('')
+    setOkClave('')
+    if (claveNueva !== claveConfirmar) {
+      setErrorClave('La confirmación no coincide con la contraseña nueva.')
+      return
+    }
+    setGuardandoClave(true)
+    try {
+      await cambiarPassword(claveActual, claveNueva)
+      setOkClave('Contraseña actualizada.')
+      setClaveActual('')
+      setClaveNueva('')
+      setClaveConfirmar('')
+    } catch (err) {
+      setErrorClave(err.message || 'No se pudo cambiar la contraseña.')
+    } finally {
+      setGuardandoClave(false)
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '500px' }}>
       <div className="adm-panel">
@@ -55,8 +85,53 @@ export default function Ajustes() {
           </div>
         </div>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginTop: '1rem' }}>
-          Próximamente: cambiar contraseña y configuración de notificaciones.
+          Próximamente: configuración de notificaciones.
         </p>
+      </div>
+
+      <div className="adm-panel">
+        <h2>Cambiar contraseña</h2>
+        <form onSubmit={guardarClave} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div className="adm-field">
+            <label>Contraseña actual</label>
+            <input
+              type="password"
+              value={claveActual}
+              onChange={(e) => setClaveActual(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          <div className="adm-field">
+            <label>Contraseña nueva</label>
+            <input
+              type="password"
+              value={claveNueva}
+              onChange={(e) => setClaveNueva(e.target.value)}
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </div>
+          <div className="adm-field">
+            <label>Confirmar contraseña nueva</label>
+            <input
+              type="password"
+              value={claveConfirmar}
+              onChange={(e) => setClaveConfirmar(e.target.value)}
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </div>
+
+          {errorClave && <p className="adm-error" role="alert">{errorClave}</p>}
+          {okClave && <p style={{ fontSize: '0.85rem', color: '#6ee79f' }}>{okClave}</p>}
+
+          <button type="submit" className="adm-btn adm-btn--primary" disabled={guardandoClave}>
+            {guardandoClave ? 'Guardando…' : 'Cambiar contraseña'}
+          </button>
+        </form>
       </div>
 
       <div className="adm-panel">

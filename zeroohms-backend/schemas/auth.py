@@ -6,6 +6,11 @@ class LoginRequest(BaseModel):
     clave: str
 
 
+class CambiarClaveRequest(BaseModel):
+    clave_actual: str
+    clave_nueva: str
+
+
 class VerifyOtpRequest(BaseModel):
     usuario: str
     codigo: str

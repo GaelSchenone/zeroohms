@@ -8,8 +8,8 @@ from config.settings import settings
 from middleware.auth import get_current_user
 from models.usuario import Usuario
 from models.login_otp import LoginOtp
-from schemas.auth import LoginRequest, VerifyOtpRequest, RequiereOtpResponse, TokenResponse, UsuarioResponse
-from services.auth_service import verify_password, create_token
+from schemas.auth import LoginRequest, VerifyOtpRequest, RequiereOtpResponse, TokenResponse, UsuarioResponse, CambiarClaveRequest
+from services.auth_service import verify_password, create_token, hash_password
 from services.otp_service import generar_codigo, hash_codigo
 from services.email_service import enviar_email, codigo_login_html
 
@@ -73,3 +73,20 @@ def me(usuario: str = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
+
+
+@router.put("/me/password")
+def cambiar_password(
+    body: CambiarClaveRequest,
+    usuario: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = db.query(Usuario).filter(Usuario.usuario == usuario).first()
+    if not user or not verify_password(body.clave_actual, user.clave):
+        raise HTTPException(status_code=401, detail="La contraseña actual es incorrecta")
+    if len(body.clave_nueva) < 6:
+        raise HTTPException(status_code=400, detail="La contraseña nueva debe tener al menos 6 caracteres")
+
+    user.clave = hash_password(body.clave_nueva)
+    db.commit()
+    return {"message": "Contraseña actualizada"}

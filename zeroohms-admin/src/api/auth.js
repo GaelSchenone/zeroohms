@@ -20,6 +20,13 @@ export async function getMe() {
   return api('/auth/me')
 }
 
+export async function cambiarPassword(claveActual, claveNueva) {
+  return api('/auth/me/password', {
+    method: 'PUT',
+    body: { clave_actual: claveActual, clave_nueva: claveNueva },
+  })
+}
+
 export function logout() {
   clearToken()
 }
