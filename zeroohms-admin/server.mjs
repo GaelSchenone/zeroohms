@@ -1,4 +1,5 @@
 import { createServer, request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -67,9 +68,10 @@ async function serveStatic(res, pathname) {
 
 function proxyToBackend(req, res) {
   const backend = new URL(BACKEND_URL);
-  const proxyReq = httpRequest({
+  const request = backend.protocol === 'https:' ? httpsRequest : httpRequest;
+  const proxyReq = request({
     hostname: backend.hostname,
-    port: backend.port,
+    port: backend.port || (backend.protocol === 'https:' ? 443 : 80),
     path: req.url,
     method: req.method,
     headers: { ...req.headers, host: backend.host },
