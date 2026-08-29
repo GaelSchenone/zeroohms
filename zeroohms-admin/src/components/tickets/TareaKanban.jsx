@@ -56,6 +56,9 @@ const FORM_VACIO = { descripcion: '', prioridad: 'media', usuario: '', fechalimi
 
 export default function TareaKanban({
   tkid = null,
+  usuario = null,
+  sinAsignar = false,
+  showTicketBadge = false,
   title = 'Tablero de tareas',
   actions = null,
   showCreate = true,
@@ -157,7 +160,13 @@ export default function TareaKanban({
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [menuAbierto])
 
-  const flatOrder = columnas.flatMap((col) => tareas.filter((t) => t.estado_actual === col.nombre))
+  const tareasVisibles = tareas.filter((t) => {
+    if (sinAsignar) return !t.usuario
+    if (usuario) return t.usuario === usuario
+    return true
+  })
+
+  const flatOrder = columnas.flatMap((col) => tareasVisibles.filter((t) => t.estado_actual === col.nombre))
 
   const moverVarias = async (ids, posestadoId) => {
     const columna = columnas.find((c) => c.id === posestadoId)
@@ -288,7 +297,9 @@ export default function TareaKanban({
         return next
       })
       setLastClicked(tareaid)
+      return
     }
+    setLastClicked(tareaid)
   }
 
   const handleDragStart = (e, tareaid) => {
@@ -459,7 +470,7 @@ export default function TareaKanban({
       ) : (
         <div className="adm-kanban">
           {columnas.map((col) => {
-            const deColumna = tareas.filter((t) => t.estado_actual === col.nombre)
+            const deColumna = tareasVisibles.filter((t) => t.estado_actual === col.nombre)
             return (
               <section
                 key={col.id}
@@ -490,9 +501,24 @@ export default function TareaKanban({
                         onDragEnd={handleDragEnd}
                       >
                         <div className="adm-kanban-card-head">
-                          <span className={`adm-kanban-priority tk-prioridad--${t.prioridad}`}>
-                            {t.prioridad}
-                          </span>
+                          {editando?.tareaid === t.tareaid && editando.campo === 'prioridad' ? (
+                            <span onClick={(e) => e.stopPropagation()}>
+                              <Combobox
+                                autoOpen
+                                value={t.prioridad}
+                                onChange={(v) => guardarCampo(t.tareaid, 'prioridad', v)}
+                                onClose={() => setEditando(null)}
+                                options={PRIORIDADES.map((p) => ({ value: p, label: p.charAt(0).toUpperCase() + p.slice(1) }))}
+                              />
+                            </span>
+                          ) : (
+                            <span
+                              className={`adm-kanban-priority tk-prioridad--${t.prioridad}`}
+                              onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'prioridad' }) }}
+                            >
+                              {t.prioridad}
+                            </span>
+                          )}
                           <span className="tk-drag" aria-hidden="true">
                             <span /><span /><span /><span /><span /><span />
                           </span>
@@ -543,6 +569,7 @@ export default function TareaKanban({
                         )}
 
                         <div className="tk-meta">
+                          {showTicketBadge && <span className="tk-ticket-badge">Ticket #{t.tkid}</span>}
                           {editando?.tareaid === t.tareaid && editando.campo === 'fechalimite' ? (
                             <input
                               type="date"
