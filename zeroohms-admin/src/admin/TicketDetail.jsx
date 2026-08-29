@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { api, apiBlob } from '../api/client.js'
-import { estadoClass, formatEstado, formatRelativo } from '../utils/format.js'
+import { estadoClass, formatEstado, formatRelativo, nombreCompleto } from '../utils/format.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
 import TicketFlowStepper from '../components/tickets/TicketFlowStepper.jsx'
 import AsignarClienteModal from '../components/tickets/AsignarClienteModal.jsx'
@@ -31,6 +31,7 @@ export default function TicketDetail() {
   const [errorChecklist, setErrorChecklist] = useState('')
   const [exito, setExito] = useState(false)
   const [deletingEj, setDeletingEj] = useState(null)
+  const [usuarios, setUsuarios] = useState([])
 
   const fetchEstados = useCallback(async () => {
     setEstadosLoading(true)
@@ -57,6 +58,16 @@ export default function TicketDetail() {
       .finally(() => setLoading(false))
     api('/checklists').then(setChecklists).catch(() => setChecklists([]))
   }, [id, navigate])
+
+  useEffect(() => {
+    api('/usuarios?per_page=100').then(setUsuarios).catch(() => setUsuarios([]))
+  }, [])
+
+  const nombreAsignado = (username) => {
+    if (!username) return ''
+    const u = usuarios.find((usr) => usr.usuario === username)
+    return u ? nombreCompleto(u) : username
+  }
 
   const fetchTicket = () => {
     setLoading(true)
@@ -297,7 +308,7 @@ export default function TicketDetail() {
                     </div>
                     <div className="adm-detail-item" style={{ gridColumn: '1 / -1' }}>
                       <span className="adm-detail-label">Técnico asignado</span>
-                      <span className="adm-detail-value">{ticket.usuario || '—'}</span>
+                      <span className="adm-detail-value">{nombreAsignado(ticket.usuario) || '—'}</span>
                     </div>
                   </div>
                 </div>
@@ -488,7 +499,7 @@ export default function TicketDetail() {
                           </div>
                         </div>
                         <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
-                          Realizada por: {ej.usuario || '—'}
+                          Realizada por: {nombreAsignado(ej.usuario) || '—'}
                         </div>
                         <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                           {ej.respuestas?.map((r, ri) => (
@@ -513,10 +524,7 @@ export default function TicketDetail() {
           tkid={id}
           ticketActual={ticket}
           onClose={() => setShowAsignar(false)}
-          onAsignado={() => {
-            setShowAsignar(false)
-            fetchTicket()
-          }}
+          onAsignado={fetchTicket}
         />
       )}
     </div>

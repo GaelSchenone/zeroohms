@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { crearSesionSubida, listarFotos } from '../../api/fotos.js'
+import useModalTransition from '../../hooks/useModalTransition.js'
+import useStaggerReveal from '../../hooks/useStaggerReveal.js'
 import './QrSubidaModal.css'
 
 const INTERVALO_POLLING = 2500
@@ -13,6 +15,10 @@ export default function QrSubidaModal({ tkid, onClose, onFotosNuevas }) {
   const cantidadInicialRef = useRef(null)
 
   const esLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+
+  const { backdropRef, modalRef, requestClose } = useModalTransition(onClose)
+  const vencido = sesion && segundosRestantes <= 0
+  const bodyRef = useStaggerReveal(`${sesion ? 'on' : 'off'}:${vencido}:${nuevasDetectadas}`)
 
   const generarSesion = () => {
     setError('')
@@ -75,19 +81,18 @@ export default function QrSubidaModal({ tkid, onClose, onFotosNuevas }) {
   }, [sesion, tkid, onFotosNuevas])
 
   const url = sesion ? `${window.location.origin}/subir-fotos#t=${sesion.token}` : ''
-  const vencido = sesion && segundosRestantes <= 0
   const mm = String(Math.floor(segundosRestantes / 60)).padStart(2, '0')
   const ss = String(segundosRestantes % 60).padStart(2, '0')
 
   return (
-    <div className="qsm-backdrop" role="dialog" aria-modal="true" aria-label="Subir fotos desde el celular" onClick={onClose}>
-      <div className="qsm-modal" onClick={(e) => e.stopPropagation()}>
+    <div ref={backdropRef} className="qsm-backdrop" role="dialog" aria-modal="true" aria-label="Subir fotos desde el celular" onClick={requestClose}>
+      <div ref={modalRef} className="qsm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="qsm-head">
           <h2>Subir fotos desde el celular</h2>
-          <button type="button" className="qsm-close" aria-label="Cerrar" onClick={onClose}>×</button>
+          <button type="button" className="qsm-close" aria-label="Cerrar" onClick={requestClose}>×</button>
         </div>
 
-        <div className="qsm-body">
+        <div ref={bodyRef} className="qsm-body">
           {esLocalhost && (
             <div className="qsm-warning">
               Estás en <code>localhost</code>: el celular no va a poder conectarse a esta dirección.
@@ -123,7 +128,7 @@ export default function QrSubidaModal({ tkid, onClose, onFotosNuevas }) {
         </div>
 
         <div className="qsm-foot">
-          <button type="button" className="adm-btn adm-btn--primary" onClick={onClose}>Listo</button>
+          <button type="button" className="adm-btn adm-btn--primary" onClick={requestClose}>Listo</button>
         </div>
       </div>
     </div>

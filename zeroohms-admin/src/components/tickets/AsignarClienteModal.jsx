@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api/client.js'
+import useModalTransition from '../../hooks/useModalTransition.js'
+import useStaggerReveal from '../../hooks/useStaggerReveal.js'
 import './AsignarClienteModal.css'
 
 const CLIENTE_VACIO = { dni: '', nombre: '', apellido: '', telefono: '', email: '' }
@@ -22,6 +24,10 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
   const dropdownRef = useRef(null)
+
+  const { backdropRef, modalRef, requestClose } = useModalTransition(onClose)
+  const resultadosRef = useStaggerReveal(resultados)
+  const dispositivosRef = useStaggerReveal(dispositivos)
 
   useEffect(() => {
     if (busqueda.trim().length < 2) {
@@ -112,6 +118,7 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
       })
 
       onAsignado?.()
+      requestClose()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -120,11 +127,11 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
   }
 
   return (
-    <div className="acm-backdrop" role="dialog" aria-modal="true" aria-label="Cambiar cliente del ticket">
-      <div className="acm-modal">
+    <div ref={backdropRef} className="acm-backdrop" role="dialog" aria-modal="true" aria-label="Cambiar cliente del ticket">
+      <div ref={modalRef} className="acm-modal">
         <div className="acm-head">
           <h2>Cambiar cliente del ticket</h2>
-          <button type="button" className="acm-close" aria-label="Cerrar" onClick={onClose}>×</button>
+          <button type="button" className="acm-close" aria-label="Cerrar" onClick={requestClose}>×</button>
         </div>
 
         <div className="acm-tabs">
@@ -156,7 +163,7 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
                 onChange={(e) => { setBusqueda(e.target.value); setClienteSeleccionado(null) }}
               />
               {resultados.length > 0 && (
-                <div className="acm-results">
+                <div ref={resultadosRef} className="acm-results">
                   {resultados.map((c) => (
                     <button
                       type="button"
@@ -190,7 +197,7 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
           {tab === 'buscar' && clienteSeleccionado && dispositivos.length > 0 && (
             <>
               <div className="acm-section-label"><span>Equipo para este ticket</span><span className="line" /></div>
-              <div className="acm-results">
+              <div ref={dispositivosRef} className="acm-results">
                 {dispositivos.map((d) => (
                   <label className="acm-result-row acm-radio-row" key={d.dispositivoid}>
                     <input
@@ -231,7 +238,7 @@ export default function AsignarClienteModal({ tkid, ticketActual, onClose, onAsi
         </div>
 
         <div className="acm-foot">
-          <button type="button" className="adm-btn adm-btn--subtle" onClick={onClose}>Cancelar</button>
+          <button type="button" className="adm-btn adm-btn--subtle" onClick={requestClose}>Cancelar</button>
           <button type="button" className="adm-btn adm-btn--primary" onClick={handleGuardar} disabled={guardando}>
             {guardando ? 'Guardando…' : 'Guardar asignación'}
           </button>

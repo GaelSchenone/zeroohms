@@ -124,3 +124,17 @@
   padding: 1rem 1.3rem;
   border-top: 1px solid var(--border);
 }
+
+@media (max-width: 720px){
+  .qsm-backdrop{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .qsm-modal{
+    width: 100%;
+    max-height: 88vh;
+    overflow: auto;
+    border-radius: 20px 20px 0 0;
+  }
+}

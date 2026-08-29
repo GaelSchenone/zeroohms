@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "pixelarticons": "^2.2.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",

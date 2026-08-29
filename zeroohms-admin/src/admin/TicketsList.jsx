@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { formatEstado, estadoClass, diasDesde, tonoAntiguedad } from '../utils/format.js'
 import { Plus } from 'pixelarticons/react'
+import useStaggerReveal from '../hooks/useStaggerReveal.js'
 
 const ESTADOS_TERMINALES = ['entregado', 'cancelado']
 
@@ -28,6 +29,8 @@ export default function TicketsList() {
   const filtered = filter === 'Todos'
     ? tickets
     : tickets.filter((t) => t.estado_actual === filter)
+
+  const tbodyRef = useStaggerReveal(filtered)
 
   return (
     <div className="adm-panel">
@@ -78,7 +81,7 @@ export default function TicketsList() {
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={tbodyRef}>
               {filtered.map((t) => {
                 const equipo = [t.dispositivo_marca, t.dispositivo_modelo].filter(Boolean).join(' ')
                 const cliente = [t.propietario_nombre, t.propietario_apellido].filter(Boolean).join(' ')

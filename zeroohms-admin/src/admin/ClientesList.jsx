@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { Plus } from 'pixelarticons/react'
+import useStaggerReveal from '../hooks/useStaggerReveal.js'
 
 export default function ClientesList() {
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
+  const tbodyRef = useStaggerReveal(clientes)
 
   useEffect(() => {
     const params = new URLSearchParams({ page, per_page: 20 })
@@ -50,7 +52,7 @@ export default function ClientesList() {
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={tbodyRef}>
               {clientes.map((c) => (
                 <tr key={c.dni}>
                   <td className="adm-td-id">{c.dni}</td>

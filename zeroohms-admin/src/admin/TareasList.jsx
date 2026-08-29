@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api/client.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
+import { nombreCompleto } from '../utils/format.js'
 
 const TAB_STORAGE_KEY = 'zo-tareas-tab'
 
@@ -63,7 +64,7 @@ export default function TareasList() {
             className={`adm-tab${activeTab === u.usuario ? ' is-active' : ''}`}
             onClick={() => selectTab(u.usuario)}
           >
-            {u.usuario}
+            {nombreCompleto(u)}
           </button>
         ))}
       </div>

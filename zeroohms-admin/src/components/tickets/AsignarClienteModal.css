@@ -198,3 +198,20 @@
   padding: 1rem 1.3rem;
   border-top: 1px solid var(--border);
 }
+
+@media (max-width: 720px){
+  .acm-backdrop{
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .acm-modal{
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .acm-field-row{
+    grid-template-columns: 1fr;
+  }
+}

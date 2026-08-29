@@ -5,6 +5,8 @@ export default function UsuariosForm({ initial, onClose, onSaved }) {
   const isEditing = !!initial
   const [form, setForm] = useState({
     usuario: '',
+    nombre: '',
+    apellido: '',
     mail: '',
     clave: '',
   })
@@ -15,6 +17,8 @@ export default function UsuariosForm({ initial, onClose, onSaved }) {
     if (initial) {
       setForm({
         usuario: initial.usuario,
+        nombre: initial.nombre || '',
+        apellido: initial.apellido || '',
         mail: initial.mail || '',
         clave: '',
       })
@@ -29,6 +33,8 @@ export default function UsuariosForm({ initial, onClose, onSaved }) {
       if (isEditing) {
         const body = {
           mail: form.mail.trim() || null,
+          nombre: form.nombre.trim() || null,
+          apellido: form.apellido.trim() || null,
         }
         if (form.clave.trim()) {
           body.clave = form.clave.trim()
@@ -42,6 +48,8 @@ export default function UsuariosForm({ initial, onClose, onSaved }) {
           method: 'POST',
           body: {
             usuario: form.usuario.trim(),
+            nombre: form.nombre.trim() || null,
+            apellido: form.apellido.trim() || null,
             mail: form.mail.trim() || null,
             clave: form.clave.trim(),
           },
@@ -90,6 +98,27 @@ export default function UsuariosForm({ initial, onClose, onSaved }) {
           />
         </div>
       )}
+
+      <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="adm-field" style={{ flex: 1 }}>
+          <label>Nombre</label>
+          <input
+            type="text"
+            value={form.nombre}
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+            placeholder="Ej: Juan"
+          />
+        </div>
+        <div className="adm-field" style={{ flex: 1 }}>
+          <label>Apellido</label>
+          <input
+            type="text"
+            value={form.apellido}
+            onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+            placeholder="Ej: Pérez"
+          />
+        </div>
+      </div>
 
       <div className="adm-field">
         <label>Email</label>

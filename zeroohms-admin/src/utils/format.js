@@ -34,6 +34,14 @@ export function estadoClass(estado) {
   return estado.toLowerCase().replace(/[ _]/g, '-')
 }
 
+// Arma el nombre para mostrar de un usuario ({usuario, nombre, apellido}),
+// con el username como respaldo si todavía no cargó nombre/apellido.
+export function nombreCompleto(user) {
+  if (!user) return ''
+  const completo = [user.nombre, user.apellido].filter(Boolean).join(' ').trim()
+  return completo || user.usuario || ''
+}
+
 export function iniciales(nombre) {
   if (!nombre) return '—'
   return nombre

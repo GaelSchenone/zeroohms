@@ -3,6 +3,8 @@ import { Navigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { Plus, SettingsCog2 } from 'pixelarticons/react'
 import UsuariosForm from './UsuariosForm.jsx'
+import useStaggerReveal from '../hooks/useStaggerReveal.js'
+import { nombreCompleto } from '../utils/format.js'
 
 export default function UsuariosList() {
   const { user } = useOutletContext() ?? {}
@@ -10,6 +12,7 @@ export default function UsuariosList() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const tbodyRef = useStaggerReveal(usuarios)
 
   const fetchUsuarios = () => {
     setLoading(true)
@@ -79,15 +82,17 @@ export default function UsuariosList() {
           <table className="adm-table">
             <thead>
               <tr>
+                <th>Nombre</th>
                 <th>Usuario</th>
                 <th>Email</th>
                 <th>Fecha creación</th>
                 <th>Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={tbodyRef}>
               {usuarios.map((u) => (
                 <tr key={u.usuario}>
+                  <td>{nombreCompleto(u)}</td>
                   <td className="adm-td-id">{u.usuario}</td>
                   <td>{u.mail || '—'}</td>
                   <td>
@@ -115,7 +120,7 @@ export default function UsuariosList() {
               ))}
               {usuarios.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="adm-empty">No hay usuarios.</td>
+                  <td colSpan="5" className="adm-empty">No hay usuarios.</td>
                 </tr>
               )}
             </tbody>

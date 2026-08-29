@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '../../api/client.js'
 import { Plus, Search, Reload, SettingsCog2, ChevronDown } from 'pixelarticons/react'
-import { iniciales } from '../../utils/format.js'
+import { iniciales, nombreCompleto } from '../../utils/format.js'
 import Combobox from './Combobox.jsx'
 import './TareaKanban.css'
 
@@ -159,6 +159,12 @@ export default function TareaKanban({
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [menuAbierto])
+
+  const nombreAsignado = (username) => {
+    if (!username) return ''
+    const u = usuarios.find((usr) => usr.usuario === username)
+    return u ? nombreCompleto(u) : username
+  }
 
   const tareasVisibles = tareas.filter((t) => {
     if (sinAsignar) return !t.usuario
@@ -419,7 +425,7 @@ export default function TareaKanban({
             placeholder="Asignar a…"
             value={null}
             onChange={aplicarAsignar}
-            options={usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))}
+            options={usuarios.map((u) => ({ value: u.usuario, label: nombreCompleto(u) }))}
             disabled={aplicandoBulk}
           />
           <Combobox
@@ -453,7 +459,7 @@ export default function TareaKanban({
             placeholder="Sin asignar"
             value={form.usuario}
             onChange={(v) => setForm((f) => ({ ...f, usuario: v }))}
-            options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))]}
+            options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: nombreCompleto(u) }))]}
           />
           <input type="date" value={form.fechalimite} onChange={setCampo('fechalimite')} />
           <button type="submit" className="adm-btn" disabled={guardando}>
@@ -599,15 +605,16 @@ export default function TareaKanban({
                                 value={t.usuario || ''}
                                 onChange={(v) => guardarCampo(t.tareaid, 'usuario', v || null)}
                                 onClose={() => setEditando(null)}
-                                options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: u.usuario }))]}
+                                options={[{ value: '', label: 'Sin asignar' }, ...usuarios.map((u) => ({ value: u.usuario, label: nombreCompleto(u) }))]}
                               />
                             </span>
                           ) : t.usuario ? (
                             <span
                               className="tk-who"
+                              title={nombreAsignado(t.usuario)}
                               onDoubleClick={(e) => { e.stopPropagation(); setEditando({ tareaid: t.tareaid, campo: 'usuario' }) }}
                             >
-                              <span className="tk-who-avatar">{iniciales(t.usuario)}</span>
+                              <span className="tk-who-avatar">{iniciales(nombreAsignado(t.usuario))}</span>
                             </span>
                           ) : (
                             <span

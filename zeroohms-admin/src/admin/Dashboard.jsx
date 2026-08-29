@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
-import { formatEstado, estadoClass, formatMoney, diasDesde, tonoAntiguedad, iniciales } from '../utils/format.js'
+import { formatEstado, estadoClass, formatMoney, diasDesde, tonoAntiguedad, iniciales, nombreCompleto } from '../utils/format.js'
 import {
   Plus, Inbox, Cpu, Clock, CheckDouble, Users, SquareAlert, Wallet,
   ClipboardNote, Settings2, ChartBarBig, ArrowRight, Human,
@@ -66,20 +66,23 @@ export default function Dashboard() {
   const [clientes, setClientes] = useState([])
   const [tareas, setTareas] = useState([])
   const [presupuestos, setPresupuestos] = useState([])
+  const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
-      api('/tickets?per_page=200'),
-      api('/clientes?per_page=200'),
-      api('/tareas?per_page=200'),
-      api('/presupuestos?per_page=200'),
+      api('/tickets?per_page=100'),
+      api('/clientes?per_page=100'),
+      api('/tareas?per_page=100'),
+      api('/presupuestos?per_page=100'),
+      api('/usuarios?per_page=100'),
     ])
-      .then(([t, c, ta, p]) => {
+      .then(([t, c, ta, p, us]) => {
         setTickets(t)
         setClientes(c)
         setTareas(ta)
         setPresupuestos(p)
+        setUsuarios(us)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -125,10 +128,13 @@ export default function Dashboard() {
 
   const cargaPorTecnico = Object.values(
     tareas.reduce((acc, t) => {
-      const nombre = t.usuario
-      if (!nombre) return acc
-      if (!acc[nombre]) acc[nombre] = { nombre, activos: 0 }
-      if (t.estado_actual !== 'completada') acc[nombre].activos += 1
+      const usuario = t.usuario
+      if (!usuario) return acc
+      if (!acc[usuario]) {
+        const u = usuarios.find((usr) => usr.usuario === usuario)
+        acc[usuario] = { nombre: u ? nombreCompleto(u) : usuario, activos: 0 }
+      }
+      if (t.estado_actual !== 'completada') acc[usuario].activos += 1
       return acc
     }, {}),
   )
@@ -146,7 +152,7 @@ export default function Dashboard() {
     weekday: 'long', day: 'numeric', month: 'long',
   })
 
-  const firstName = user?.usuario ? user.usuario.split(' ')[0] : null
+  const firstName = user?.nombre || (user?.usuario ? user.usuario.split(' ')[0] : null)
 
   if (loading) {
     return (
@@ -175,9 +181,6 @@ export default function Dashboard() {
           <p className="adm-dash-subtitle">{today} · así viene el taller hoy</p>
         </div>
         <div className="adm-dash-header-actions">
-          <Link to="/clientes/nuevo" className="adm-btn adm-btn--subtle">
-            <Users size={16} /> Nuevo cliente
-          </Link>
           <Link to="/tickets/nuevo" className="adm-btn adm-btn--primary">
             <Plus size={16} /> Nuevo ticket
           </Link>
@@ -241,7 +244,7 @@ export default function Dashboard() {
       </div>
 
       <div className="adm-row-label"><span>Negocio del mes</span><span className="adm-row-label-line" /></div>
-      <div className="adm-stats">
+      <div className="adm-stats adm-stats--month">
         <div className="adm-stat-card" data-tone="success">
           <div className="adm-stat-top">
             <span className="adm-stat-icon"><Wallet size={18} /></span>

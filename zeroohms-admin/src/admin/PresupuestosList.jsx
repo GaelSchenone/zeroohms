@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../api/client.js'
 import { formatEstado, estadoClass, formatMoney } from '../utils/format.js'
 import Combobox from '../components/tickets/Combobox.jsx'
+import useStaggerReveal from '../hooks/useStaggerReveal.js'
 
 export default function PresupuestosList() {
   const [presupuestos, setPresupuestos] = useState([])
@@ -10,6 +11,7 @@ export default function PresupuestosList() {
   const [filterTkId, setFilterTkId] = useState('')
   const [changing, setChanging] = useState(null)
   const [deleting, setDeleting] = useState(null)
+  const tbodyRef = useStaggerReveal(presupuestos)
 
   const fetchPresupuestos = () => {
     setLoading(true)
@@ -84,7 +86,7 @@ export default function PresupuestosList() {
                 <th>Acciones</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={tbodyRef}>
               {presupuestos.map((p) => (
                 <tr key={p.presupuestoid}>
                   <td className="adm-td-id">#{p.presupuestoid}</td>

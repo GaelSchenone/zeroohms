@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { Plus } from 'pixelarticons/react'
+import useStaggerReveal from '../hooks/useStaggerReveal.js'
 
 export default function ChecklistsList() {
   const [checklists, setChecklists] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(null)
+  const tbodyRef = useStaggerReveal(checklists)
 
   const fetchChecklists = () => {
     api('/checklists')
@@ -49,7 +51,7 @@ export default function ChecklistsList() {
               <th></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody ref={tbodyRef}>
             {checklists.map((c) => (
               <tr key={c.checklistid}>
                 <td className="adm-td-id">#{c.checklistid}</td>

@@ -51,10 +51,10 @@ export default function FotosTicket({ tkid }) {
   }
 
   const handleBorrar = async (fotoid) => {
-    if (!window.confirm('¿Eliminar esta foto?')) return
+    if (!window.confirm('¿Eliminar esta foto?')) return false
     await borrarFoto(fotoid)
     setFotos((prev) => prev.filter((f) => f.fotoid !== fotoid))
-    setLightboxIndex(null)
+    return true
   }
 
   return (

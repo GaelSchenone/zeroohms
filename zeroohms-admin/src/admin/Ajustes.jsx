@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { cambiarPassword } from '../api/auth.js'
 import { iniciarConexionGoogle, estadoConexionGoogle, desconectarGoogle } from '../api/google.js'
+import { nombreCompleto } from '../utils/format.js'
 
 export default function Ajustes() {
   const { user } = useOutletContext() ?? {}
@@ -75,6 +76,10 @@ export default function Ajustes() {
       <div className="adm-panel">
         <h2>Ajustes</h2>
         <div className="adm-detail-grid">
+          <div className="adm-detail-item">
+            <span className="adm-detail-label">Nombre</span>
+            <span className="adm-detail-value">{user ? (nombreCompleto(user) || '—') : '—'}</span>
+          </div>
           <div className="adm-detail-item">
             <span className="adm-detail-label">Usuario</span>
             <span className="adm-detail-value">{user?.usuario || '—'}</span>
