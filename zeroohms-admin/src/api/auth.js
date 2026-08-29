@@ -1,9 +1,16 @@
 import { api, setToken, clearToken } from './client.js'
 
 export async function login(usuario, clave) {
-  const data = await api('/auth/login', {
+  return api('/auth/login', {
     method: 'POST',
     body: { usuario, clave },
+  })
+}
+
+export async function verifyOtp(usuario, codigo, recordar) {
+  const data = await api('/auth/login/verify', {
+    method: 'POST',
+    body: { usuario, codigo, recordar },
   })
   setToken(data.access_token)
   return data

@@ -12,3 +12,4 @@ from .estados import (
     EstadoUsuario, EstadoTK, EstadoTarea, EstadoPresupuesto,
 )
 from .foto import Foto
+from .login_otp import LoginOtp

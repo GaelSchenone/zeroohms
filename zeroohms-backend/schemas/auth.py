@@ -6,6 +6,16 @@ class LoginRequest(BaseModel):
     clave: str
 
 
+class VerifyOtpRequest(BaseModel):
+    usuario: str
+    codigo: str
+    recordar: bool = False
+
+
+class RequiereOtpResponse(BaseModel):
+    requiere_otp: bool = True
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

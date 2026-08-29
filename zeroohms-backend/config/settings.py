@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_MINUTES: int = 1440
+    JWT_REMEMBER_EXPIRATION_MINUTES: int = 60 * 24 * 180
+
+    OTP_EXPIRATION_MINUTES: int = 10
 
     CORS_ORIGIN: str
 

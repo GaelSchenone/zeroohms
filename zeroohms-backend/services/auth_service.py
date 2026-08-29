@@ -19,8 +19,9 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def create_token(usuario: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_EXPIRATION_MINUTES)
+def create_token(usuario: str, expiration_minutes: int | None = None) -> str:
+    minutos = expiration_minutes if expiration_minutes is not None else settings.JWT_EXPIRATION_MINUTES
+    expire = datetime.now(timezone.utc) + timedelta(minutes=minutos)
     return jwt.encode(
         {"sub": usuario, "typ": "login", "exp": expire},
         settings.JWT_SECRET,

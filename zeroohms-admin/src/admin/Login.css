@@ -77,9 +77,37 @@
   border-color: #F0513B;
 }
 
+.login-remember{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.login-remember input{
+  accent-color: #F0513B;
+}
+
 .login-error{
   font-size: 0.85rem;
   color: #ff8a74;
+}
+
+.login-resend{
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.login-resend:hover{
+  color: #fff;
 }
 
 .login-submit{
