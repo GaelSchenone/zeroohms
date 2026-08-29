@@ -19,3 +19,51 @@
     display: flex;
     gap: 2rem;
 }
+
+.nav-toggle{
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0.4rem;
+}
+
+@media (max-width: 560px){
+    .homepage-header{
+        padding: 1rem 1.25rem;
+    }
+
+    .homepage-header .logo img{
+        width: 76px;
+    }
+
+    .nav-toggle{
+        display: flex;
+    }
+
+    .homepage-header .nav{
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(5, 5, 5, 0.92);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        transition: max-height 0.2s ease;
+    }
+
+    .homepage-header .nav.nav--open{
+        max-height: 260px;
+    }
+
+    .homepage-header .nav a{
+        padding: 1rem 1.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.95rem;
+    }
+}

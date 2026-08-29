@@ -1,37 +1,86 @@
 .track-page{
+  position: relative;
   min-height: 100vh;
+  background: #050505;
+  color: #fff;
+  overflow: hidden;
+}
+
+.track-bg-layer{
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.track-content{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.track-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  background: rgba(5, 5, 5, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.track-header-logo img{
+  width: 70px;
+  display: block;
+}
+
+.track-back-link{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.15s ease;
+}
+
+.track-back-link:hover{
+  color: #F0513B;
+}
+
+.track-body{
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: #050505;
-  color: #fff;
+  padding: 3rem 1.5rem;
 }
 
 .track-card{
   width: 100%;
-  max-width: 520px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-}
-
-.track-logo{
-  width: 160px;
+  gap: 1.25rem;
+  text-align: center;
 }
 
 .track-title{
   font-family: 'NType82', sans-serif;
   font-size: 2rem;
   font-weight: 400;
-  text-align: center;
+}
+
+.track-title--sm{
+  font-size: 1.5rem;
 }
 
 .track-subtitle{
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.6);
-  text-align: center;
   line-height: 1.5;
 }
 
@@ -43,7 +92,8 @@
 
 .track-input{
   flex: 1;
-  padding: 0.75rem 1rem;
+  height: 52px;
+  padding: 0 1rem;
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.06);
@@ -59,7 +109,8 @@
 }
 
 .track-btn{
-  padding: 0.75rem 1.5rem;
+  height: 52px;
+  padding: 0 1.5rem;
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
@@ -80,6 +131,11 @@
   cursor: not-allowed;
 }
 
+.track-hint{
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .track-error{
   font-size: 0.9rem;
   color: #f87171;
@@ -90,8 +146,46 @@
   text-align: center;
 }
 
-.track-result{
+.track-result-wrap{
   width: 100%;
+  max-width: 1040px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.track-result-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.track-retry{
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.15s ease;
+}
+
+.track-retry:hover{
+  color: #F0513B;
+}
+
+.track-result{
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.track-result-panel{
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -186,45 +280,24 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.track-timeline-list{
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding-left: 0.75rem;
-  border-left: 2px solid rgba(255, 255, 255, 0.08);
+@media (max-width: 720px){
+  .track-result{
+    grid-template-columns: 1fr;
+  }
 }
 
-.track-timeline-item{
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.6rem 0 0.6rem 1rem;
-}
+@media (max-width: 560px){
+  .track-header{
+    padding: 1rem 1.25rem;
+  }
 
-.track-timeline-dot{
-  position: absolute;
-  left: -0.9rem;
-  top: 0.85rem;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-}
+  .track-header-logo img{
+    width: 56px;
+  }
 
-.track-timeline-dot--current{
-  background: #6ee79f;
-}
-
-.track-timeline-state{
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.track-timeline-date{
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.45);
+  .track-back-link span{
+    display: none;
+  }
 }
 
 @media (max-width: 480px){
@@ -234,5 +307,9 @@
 
   .track-result-info{
     grid-template-columns: 1fr;
+  }
+
+  .track-result-head{
+    flex-wrap: wrap;
   }
 }

@@ -397,21 +397,13 @@ body {
 }
 
 @media (max-width: 560px){
-  .homepage-header{
-    padding: 1rem 1.25rem;
-  }
-
-  .homepage-header .logo img{
-    width: 76px;
-  }
-
-  .homepage-header .nav{
-    gap: 0.7rem;
-    font-size: 0.7rem;
-  }
-
   .calltoaction-buttons{
-    flex-wrap: wrap;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .calltoaction-buttons .custom-button{
+    width: 100%;
   }
 
   .cards{
