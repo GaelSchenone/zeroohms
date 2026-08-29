@@ -6,7 +6,7 @@ import Header from "./components/homepage/Header/Header";
 import Button from "./components/Button/Button";
 import YoutubeCarousel from "./components/homepage/YoutubeCarousel";
 import { ComputerSharp, TabletSharp, GpuSharp, CpuSharp, SettingsCog2, MemoryStickSharp } from 'pixelarticons/react'
-import { FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa'
+import { FaInstagram, FaYoutube, FaWhatsapp, FaEnvelope } from 'react-icons/fa'
 
 const EMAIL = 'contacto@zeroohms.com.ar'
 const WHATSAPP = 'https://wa.me/5491124769779'
@@ -120,9 +120,15 @@ function HomePage() {
           <h2>¡Contactanos!</h2>
           <p>Escribinos por WhatsApp, Instagram o por email y te respondemos a la brevedad.</p>
           <div className="contact-actions">
-            <a className="contact-button contact-button--primary" href={WHATSAPP} target="_blank" rel="noreferrer">Escribirnos por WhatsApp</a>
-            <a className="contact-button" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">Escribirnos por Instagram</a>
-            <a className="contact-button" onClick={handleCopyEmail}>{copied ? '¡Email copiado!' : 'Copiar dirección de Email'}</a>
+            <a className="contact-button contact-button--primary" href={WHATSAPP} target="_blank" rel="noreferrer">
+              <FaWhatsapp color="#25D366" /> Escribirnos por WhatsApp
+            </a>
+            <a className="contact-button" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">
+              <FaInstagram color="#F0513B" /> Escribirnos por Instagram
+            </a>
+            <a className="contact-button" onClick={handleCopyEmail}>
+              <FaEnvelope /> {copied ? '¡Email copiado!' : 'Copiar dirección de Email'}
+            </a>
           </div>
         </section>
 
