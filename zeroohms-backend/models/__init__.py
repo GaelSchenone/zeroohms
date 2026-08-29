@@ -13,3 +13,4 @@ from .estados import (
 )
 from .foto import Foto
 from .login_otp import LoginOtp
+from .google_conexion import GoogleConexion

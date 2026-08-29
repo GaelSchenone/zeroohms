@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     GOOGLE_PRIVATE_KEY: str = ""
     GOOGLE_CALENDAR_ID: str = ""
 
+    GOOGLE_OAUTH_CLIENT_ID: str = ""
+    GOOGLE_OAUTH_CLIENT_SECRET: str = ""
+    GOOGLE_OAUTH_REDIRECT_URI: str = ""
+    ADMIN_FRONTEND_URL: str = ""
+
     RESEND_API_KEY: str = ""
     RESEND_FROM: str = ""
 

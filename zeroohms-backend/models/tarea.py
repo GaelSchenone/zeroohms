@@ -15,5 +15,6 @@ class Tarea(Base):
     prioridad = Column("Prioridad", Enum("baja", "media", "alta"))
     fechaasignacion = Column("FechaAsignacion", DateTime, default=datetime.utcnow)
     fechalimite = Column("FechaLimite", Date, nullable=True)
+    google_task_id = Column("GoogleTaskID", String(64), nullable=True)
 
     asignado_a = relationship("Usuario", backref="tareas")

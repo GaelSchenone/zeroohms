@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from config.database import get_db
@@ -9,6 +9,8 @@ from models.tarea import Tarea
 from models.estados import EstadoTarea, PosEstadoTarea
 from schemas.tarea import TareaCreate, TareaUpdate, TareaResponse
 from schemas.estados import CambioEstado
+from services.webhook_service import send_webhook
+from services.google_tasks_service import reconciliar_tarea_google, borrar_tarea_google_directo
 
 router = APIRouter(prefix="/api/tareas", tags=["tareas"])
 
@@ -63,6 +65,7 @@ def get_estados_tarea(db: Session = Depends(get_db), _usuario: str = Depends(get
 @router.post("", response_model=TareaResponse, status_code=201)
 def create_tarea(
     body: TareaCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
@@ -88,6 +91,22 @@ def create_tarea(
     db.commit()
     db.refresh(tarea)
 
+    background_tasks.add_task(
+        send_webhook,
+        "tarea-creada",
+        {
+            "tareaid": tarea.tareaid,
+            "tkid": tarea.tkid,
+            "usuario": tarea.usuario,
+            "descripcion": tarea.descripcion,
+            "prioridad": tarea.prioridad,
+            "fechaasignacion": tarea.fechaasignacion.isoformat() if tarea.fechaasignacion else None,
+            "fechalimite": tarea.fechalimite.isoformat() if tarea.fechalimite else None,
+            "codigo_seguimiento": tarea.ticket.codigoseguimiento if tarea.ticket else None,
+        },
+    )
+    background_tasks.add_task(reconciliar_tarea_google, tarea.tareaid)
+
     return TareaResponse(
         tareaid=tarea.tareaid,
         tkid=tarea.tkid,
@@ -104,6 +123,7 @@ def create_tarea(
 def update_tarea(
     tareaid: int,
     body: TareaUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
@@ -116,6 +136,7 @@ def update_tarea(
 
     db.commit()
     db.refresh(tarea)
+    background_tasks.add_task(reconciliar_tarea_google, tarea.tareaid)
 
     return TareaResponse(
         tareaid=tarea.tareaid,
@@ -132,15 +153,24 @@ def update_tarea(
 @router.delete("/{tareaid}")
 def delete_tarea(
     tareaid: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
     tarea = db.query(Tarea).filter(Tarea.tareaid == tareaid).first()
     if not tarea:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+    usuario_previo = tarea.usuario
+    google_task_id_previo = tarea.google_task_id
+
     db.query(EstadoTarea).filter(EstadoTarea.tareaid == tareaid).delete()
     db.delete(tarea)
     db.commit()
+
+    if usuario_previo and google_task_id_previo:
+        background_tasks.add_task(borrar_tarea_google_directo, usuario_previo, google_task_id_previo)
+
     return {"message": f"Tarea {tareaid} eliminada"}
 
 
@@ -148,6 +178,7 @@ def delete_tarea(
 def cambiar_estado_tarea(
     tareaid: int,
     body: CambioEstado,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     _usuario: str = Depends(get_current_user),
 ):
@@ -166,6 +197,7 @@ def cambiar_estado_tarea(
     )
     db.add(nuevo)
     db.commit()
+    background_tasks.add_task(reconciliar_tarea_google, tareaid)
 
     return TareaResponse(
         tareaid=tarea.tareaid,
