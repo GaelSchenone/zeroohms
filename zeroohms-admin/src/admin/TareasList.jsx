@@ -2,10 +2,27 @@ import { useEffect, useState } from 'react'
 import { api } from '../api/client.js'
 import TareaKanban from '../components/tickets/TareaKanban.jsx'
 
+const TAB_STORAGE_KEY = 'zo-tareas-tab'
+
 export default function TareasList() {
   const [filterTkId, setFilterTkId] = useState('')
   const [usuarios, setUsuarios] = useState([])
-  const [activeTab, setActiveTab] = useState('todas')
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      return localStorage.getItem(TAB_STORAGE_KEY) || 'todas'
+    } catch {
+      return 'todas'
+    }
+  })
+
+  const selectTab = (tab) => {
+    setActiveTab(tab)
+    try {
+      localStorage.setItem(TAB_STORAGE_KEY, tab)
+    } catch {
+      // localStorage no disponible (modo privado, etc.) — no persiste, no rompe nada
+    }
+  }
 
   useEffect(() => {
     let activo = true
@@ -28,14 +45,14 @@ export default function TareasList() {
         <button
           type="button"
           className={`adm-tab${activeTab === 'todas' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('todas')}
+          onClick={() => selectTab('todas')}
         >
           Todas
         </button>
         <button
           type="button"
           className={`adm-tab${activeTab === 'sin_asignar' ? ' is-active' : ''}`}
-          onClick={() => setActiveTab('sin_asignar')}
+          onClick={() => selectTab('sin_asignar')}
         >
           Sin asignar
         </button>
@@ -44,7 +61,7 @@ export default function TareasList() {
             type="button"
             key={u.usuario}
             className={`adm-tab${activeTab === u.usuario ? ' is-active' : ''}`}
-            onClick={() => setActiveTab(u.usuario)}
+            onClick={() => selectTab(u.usuario)}
           >
             {u.usuario}
           </button>
