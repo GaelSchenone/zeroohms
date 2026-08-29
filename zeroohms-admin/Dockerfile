@@ -4,6 +4,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+# URL del sitio público (zeroohms-frontend), para que el QR de "subir fotos"
+# apunte ahí y no al propio admin — ver .env.example.
+ARG VITE_PUBLIC_SITE_URL
+ENV VITE_PUBLIC_SITE_URL=$VITE_PUBLIC_SITE_URL
 RUN npm run build
 
 # Runtime: sirve dist/ y el proxy hacia el backend (server.mjs)

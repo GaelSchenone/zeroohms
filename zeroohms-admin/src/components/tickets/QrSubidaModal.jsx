@@ -14,7 +14,11 @@ export default function QrSubidaModal({ tkid, onClose, onFotosNuevas }) {
   const [nuevasDetectadas, setNuevasDetectadas] = useState(0)
   const cantidadInicialRef = useRef(null)
 
-  const esLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  // El QR tiene que apuntar al sitio público (/subir-fotos vive ahí, no en el
+  // admin) — VITE_PUBLIC_SITE_URL lo fija en build; en dev sin esa var cae al
+  // origin actual, que alcanza porque ambos corren en localhost.
+  const sitioPublico = import.meta.env.VITE_PUBLIC_SITE_URL || window.location.origin
+  const esLocalhost = ['localhost', '127.0.0.1'].includes(new URL(sitioPublico).hostname)
 
   const { backdropRef, modalRef, requestClose } = useModalTransition(onClose)
   const vencido = sesion && segundosRestantes <= 0
@@ -80,7 +84,7 @@ export default function QrSubidaModal({ tkid, onClose, onFotosNuevas }) {
     }
   }, [sesion, tkid, onFotosNuevas])
 
-  const url = sesion ? `${window.location.origin}/subir-fotos#t=${sesion.token}` : ''
+  const url = sesion ? `${sitioPublico}/subir-fotos#t=${sesion.token}` : ''
   const mm = String(Math.floor(segundosRestantes / 60)).padStart(2, '0')
   const ss = String(segundosRestantes % 60).padStart(2, '0')
 
