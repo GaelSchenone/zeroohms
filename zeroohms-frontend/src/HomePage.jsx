@@ -121,13 +121,13 @@ function HomePage() {
           <p>Escribinos por WhatsApp, Instagram o por email y te respondemos a la brevedad.</p>
           <div className="contact-actions">
             <a className="contact-button contact-button--primary" href={WHATSAPP} target="_blank" rel="noreferrer">
-              <FaWhatsapp color="#25D366" /> Escribirnos por WhatsApp
+              <FaWhatsapp size={32} color="#ffffff" /> Escribirnos por WhatsApp
             </a>
             <a className="contact-button" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">
-              <FaInstagram color="#F0513B" /> Escribirnos por Instagram
+              <FaInstagram size={32} color="#F0513B" /> Escribirnos por Instagram
             </a>
             <a className="contact-button" onClick={handleCopyEmail}>
-              <FaEnvelope /> {copied ? '¡Email copiado!' : 'Copiar dirección de Email'}
+              <FaEnvelope size={32} /> {copied ? '¡Email copiado!' : 'Copiar dirección de Email'}
             </a>
           </div>
         </section>
