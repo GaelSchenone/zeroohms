@@ -38,6 +38,8 @@ def create_usuario(
     user = Usuario(
         usuario=body.usuario,
         mail=body.mail,
+        nombre=body.nombre,
+        apellido=body.apellido,
         clave=hash_password(body.clave),
     )
     db.add(user)
@@ -77,6 +79,12 @@ def update_usuario(
 
     if body.clave is not None and body.clave.strip():
         user.clave = hash_password(body.clave)
+
+    if body.nombre is not None:
+        user.nombre = body.nombre or None
+
+    if body.apellido is not None:
+        user.apellido = body.apellido or None
 
     db.commit()
     db.refresh(user)

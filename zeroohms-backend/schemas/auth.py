@@ -29,6 +29,8 @@ class TokenResponse(BaseModel):
 class UsuarioResponse(BaseModel):
     usuario: str
     mail: str | None = None
+    nombre: str | None = None
+    apellido: str | None = None
 
     class Config:
         from_attributes = True

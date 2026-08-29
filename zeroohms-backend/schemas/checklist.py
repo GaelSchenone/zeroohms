@@ -76,6 +76,7 @@ class EjecucionResponse(BaseModel):
     checklistid: int | None = None
     checklist_nombre: str | None = None
     usuario: str | None = None
+    usuario_nombre: str | None = None
     tkid: int | None = None
     fechacreacion: str | None = None
     respuestas: list[RespuestaIngresadaResponse] = []

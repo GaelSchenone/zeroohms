@@ -17,6 +17,7 @@ from models.propietario import Propietario
 from models.estados import EstadoTK, PosEstadoTK, EstadoTarea, EstadoPresupuesto
 from models.ejecucion import Ejecucion, RespuestaIngresada
 from models.checklist import CheckList, Pregunta, Respuesta
+from models.usuario import Usuario
 from schemas.ticket import TicketCreate, TicketUpdate, TicketResponse, TicketDetalle
 from schemas.tarea import TareaResponse
 from schemas.foto import FotoResponse
@@ -267,12 +268,15 @@ def get_ticket(tkid: int, db: Session = Depends(get_db), _usuario: str = Depends
                 )
             )
         cl = db.query(CheckList).filter(CheckList.checklistid == ej.checklistid).first()
+        autor = db.query(Usuario).filter(Usuario.usuario == ej.usuario).first() if ej.usuario else None
+        usuario_nombre = " ".join(filter(None, [autor.nombre, autor.apellido])) if autor else None
         ejecuciones.append(
             EjecucionResponse(
                 ejecucionid=ej.ejecucionid,
                 checklistid=ej.checklistid,
                 checklist_nombre=cl.nombre if cl else None,
                 usuario=ej.usuario,
+                usuario_nombre=usuario_nombre or ej.usuario,
                 tkid=ej.tkid,
                 fechacreacion=str(ej.fechacreacion),
                 respuestas=respuestas,

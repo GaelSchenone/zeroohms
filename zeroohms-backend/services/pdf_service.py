@@ -379,7 +379,7 @@ def generar_informe_tecnico(ticket: dict, propietario: dict, dispositivo: dict, 
             c.drawString(x, y, ej.get("checklist_nombre") or "Checklist")
             c.setFont("Helvetica", 8)
             c.setFillColor(GRIS_CLARO)
-            c.drawRightString(x + ancho_util, y, f"{ej.get('usuario') or ''} · {_fecha(ej.get('fechacreacion'))}")
+            c.drawRightString(x + ancho_util, y, f"{ej.get('usuario_nombre') or ej.get('usuario') or ''} · {_fecha(ej.get('fechacreacion'))}")
             c.setFillColor(black)
             y -= 14
             for r in ej.get("respuestas", []):
