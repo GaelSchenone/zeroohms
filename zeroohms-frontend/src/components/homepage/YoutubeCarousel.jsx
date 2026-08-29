@@ -40,18 +40,7 @@ export default function YoutubeCarousel({ maxResults = 12 }) {
   }
 
   if (videos.length === 0) {
-    return (
-      <div className="yt-scroll yt-scroll--empty" aria-label="Videos de YouTube">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div className="yt-card yt-card--placeholder" key={index}>
-            <span className="yt-thumb" />
-            <span className="yt-info">
-              <strong className="yt-title">Título del video</strong>
-            </span>
-          </div>
-        ))}
-      </div>
-    );
+    return <div className="yt-status">No se encontraron videos de YouTube.</div>;
   }
 
   return (

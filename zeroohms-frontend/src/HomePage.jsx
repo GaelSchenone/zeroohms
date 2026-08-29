@@ -5,8 +5,8 @@ import LedGlitchBackground from "./components/homepage/LedGlitchBackground";
 import Header from "./components/homepage/Header/Header";
 import Button from "./components/Button/Button";
 import YoutubeCarousel from "./components/homepage/YoutubeCarousel";
-import { ComputerSharp, TabletSharp, GpuSharp, CpuSharp, SettingsCog2, MemoryStickSharp } from 'pixelarticons/react'
-import { FaInstagram, FaYoutube, FaWhatsapp, FaEnvelope } from 'react-icons/fa'
+import { ComputerSharp, TabletSharp, GpuSharp, CpuSharp, SettingsCog2, MemoryStickSharp, MailSharp } from 'pixelarticons/react'
+import { FaInstagram, FaYoutube, FaWhatsapp } from 'react-icons/fa'
 
 const EMAIL = 'contacto@zeroohms.com.ar'
 const WHATSAPP = 'https://wa.me/5491124769779'
@@ -121,13 +121,13 @@ function HomePage() {
           <p>Escribinos por WhatsApp, Instagram o por email y te respondemos a la brevedad.</p>
           <div className="contact-actions">
             <a className="contact-button contact-button--primary" href={WHATSAPP} target="_blank" rel="noreferrer">
-              <FaWhatsapp size={32} color="#ffffff" /> Escribirnos por WhatsApp
+              <FaWhatsapp size={32} color="#ffffff" style={{ width: 'auto' }} /> Escribirnos por WhatsApp
             </a>
             <a className="contact-button" href="https://ig.me/m/zeroohms__" target="_blank" rel="noreferrer">
-              <FaInstagram size={32} color="#F0513B" /> Escribirnos por Instagram
+              <FaInstagram size={32} color="#F0513B" style={{ width: 'auto' }} /> Escribirnos por Instagram
             </a>
-            <a className="contact-button" onClick={handleCopyEmail}>
-              <FaEnvelope size={32} /> {copied ? '¡Email copiado!' : 'Copiar dirección de Email'}
+            <a className="contact-button contact-button--mail" onClick={handleCopyEmail}>
+              <MailSharp width={32} height={32} /> {copied ? '¡Email copiado!' : 'Copiar dirección de Email'}
             </a>
           </div>
         </section>
