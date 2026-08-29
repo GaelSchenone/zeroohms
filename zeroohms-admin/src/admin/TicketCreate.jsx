@@ -10,18 +10,9 @@ const CHIPS_ACCESORIOS = [
   'Repuesto traído por el cliente',
 ]
 
-const inputMini = {
-  padding: '0.5rem 0.75rem',
-  fontSize: '0.85rem',
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: '6px',
-  color: '#fff',
-  outline: 'none',
-}
-
 export default function TicketCreate() {
   const navigate = useNavigate()
+  const [clienteExistente, setClienteExistente] = useState(false)
   const [clientes, setClientes] = useState([])
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null)
   const [busqueda, setBusqueda] = useState('')
@@ -30,7 +21,7 @@ export default function TicketCreate() {
   const [descripcion, setDescripcion] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [nuevoCliente, setNuevoCliente] = useState({ nombre: '', apellido: '', telefono: '', email: '' })
+  const [nuevoCliente, setNuevoCliente] = useState({ dni: '', nombre: '', apellido: '', telefono: '', email: '' })
   const [accesoriosSel, setAccesoriosSel] = useState([])
   const [accesorioOtro, setAccesorioOtro] = useState('')
   const [accesoriosAviso, setAccesoriosAviso] = useState('')
@@ -69,7 +60,15 @@ export default function TicketCreate() {
     setClienteSeleccionado(null)
     setBusqueda('')
     setClientes([])
-    setNuevoCliente({ nombre: '', apellido: '', telefono: '', email: '' })
+  }
+
+  const toggleClienteExistente = (checked) => {
+    setClienteExistente(checked)
+    setClienteSeleccionado(null)
+    setBusqueda('')
+    setClientes([])
+    setShowDropdown(false)
+    setNuevoCliente({ dni: '', nombre: '', apellido: '', telefono: '', email: '' })
   }
 
   const copiarCodigo = async () => {
@@ -93,18 +92,23 @@ export default function TicketCreate() {
     setAccesoriosAviso('')
     try {
       let dni
-      if (clienteSeleccionado) {
+      if (clienteExistente) {
+        if (!clienteSeleccionado) {
+          setError('Buscá y seleccioná un cliente existente.')
+          setSaving(false)
+          return
+        }
         dni = clienteSeleccionado.dni
       } else {
-        if (!busqueda.trim()) {
-          setError('Buscá un cliente existente o escribí un DNI para crear uno nuevo.')
+        if (!nuevoCliente.dni.trim()) {
+          setError('Ingresá el DNI del cliente.')
           setSaving(false)
           return
         }
         const nuevo = await api('/clientes', {
           method: 'POST',
           body: {
-            dni: busqueda.trim(),
+            dni: nuevoCliente.dni.trim(),
             nombre: nuevoCliente.nombre || null,
             apellido: nuevoCliente.apellido || null,
             telefono: nuevoCliente.telefono || null,
@@ -187,97 +191,121 @@ export default function TicketCreate() {
       )}
 
       <form className="adm-form" onSubmit={handleSubmit}>
-        <div className="adm-field" ref={dropdownRef} style={{ position: 'relative' }}>
-          <label>Cliente *</label>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <fieldset style={{ border: 'none', padding: 0, display: 'contents' }}>
+          <legend style={{ fontWeight: 600, fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Cliente
+          </legend>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
             <input
-              type="text"
-              value={busqueda}
-              onChange={(e) => { setBusqueda(e.target.value); setClienteSeleccionado(null); setShowDropdown(true) }}
-              onFocus={() => { if (clientes.length > 0) setShowDropdown(true) }}
-              placeholder="Buscar por nombre, apellido o DNI…"
-              style={{ flex: 1 }}
+              type="checkbox"
+              checked={clienteExistente}
+              onChange={(e) => toggleClienteExistente(e.target.checked)}
             />
-            {clienteSeleccionado && (
-              <button type="button" className="adm-btn adm-btn--ghost" onClick={limpiarCliente}>
-                ×
-              </button>
-            )}
-          </div>
-          {showDropdown && clientes.length > 0 && (
-            <div style={{
-              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
-              background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '8px', marginTop: '0.25rem', maxHeight: '200px', overflow: 'auto',
-            }}>
-              {clientes.map((c) => (
-                <button
-                  key={c.dni}
-                  type="button"
-                  style={{
-                    display: 'block', width: '100%', padding: '0.6rem 0.85rem',
-                    background: 'transparent', border: 'none', textAlign: 'left',
-                    color: '#fff', cursor: 'pointer', fontSize: '0.85rem',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.06)'}
-                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
-                  onClick={() => seleccionarCliente(c)}
-                >
-                  <strong>{c.nombre || ''} {c.apellido || ''}</strong>
-                  <span style={{ color: 'rgba(255,255,255,0.45)', marginLeft: '0.5rem' }}>DNI {c.dni}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {showDropdown && busqueda.trim().length >= 2 && clientes.length === 0 && !clienteSeleccionado && (
-            <div style={{
-              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
-              background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '8px', marginTop: '0.25rem', padding: '0.75rem',
-            }}>
-              <p style={{ margin: '0 0 0.6rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
-                No existe un cliente con esa búsqueda. Completá sus datos para crearlo con DNI{' '}
-                <strong style={{ color: '#F0513B' }}>{busqueda}</strong>.
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            El cliente ya existe
+          </label>
+
+          {clienteExistente ? (
+            <div className="adm-field" ref={dropdownRef} style={{ position: 'relative' }}>
+              <label>Buscar cliente *</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input
                   type="text"
-                  placeholder="Nombre"
-                  style={inputMini}
+                  value={busqueda}
+                  onChange={(e) => { setBusqueda(e.target.value); setClienteSeleccionado(null); setShowDropdown(true) }}
+                  onFocus={() => { if (clientes.length > 0) setShowDropdown(true) }}
+                  placeholder="Buscar por nombre, apellido o DNI…"
+                  style={{ flex: 1 }}
+                />
+                {clienteSeleccionado && (
+                  <button type="button" className="adm-btn adm-btn--ghost" onClick={limpiarCliente}>
+                    ×
+                  </button>
+                )}
+              </div>
+              {showDropdown && clientes.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20,
+                  background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '8px', marginTop: '0.25rem', maxHeight: '200px', overflow: 'auto',
+                }}>
+                  {clientes.map((c) => (
+                    <button
+                      key={c.dni}
+                      type="button"
+                      style={{
+                        display: 'block', width: '100%', padding: '0.6rem 0.85rem',
+                        background: 'transparent', border: 'none', textAlign: 'left',
+                        color: '#fff', cursor: 'pointer', fontSize: '0.85rem',
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.06)'}
+                      onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                      onClick={() => seleccionarCliente(c)}
+                    >
+                      <strong>{c.nombre || ''} {c.apellido || ''}</strong>
+                      <span style={{ color: 'rgba(255,255,255,0.45)', marginLeft: '0.5rem' }}>DNI {c.dni}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showDropdown && busqueda.trim().length >= 2 && clientes.length === 0 && !clienteSeleccionado && (
+                <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)' }}>
+                  No encontramos ningún cliente con esa búsqueda. Desmarcá "El cliente ya existe" para cargarlo como nuevo.
+                </p>
+              )}
+              {clienteSeleccionado && (
+                <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '6px', fontSize: '0.85rem', color: '#6ee79f' }}>
+                  ✓ {clienteSeleccionado.nombre || ''} {clienteSeleccionado.apellido || ''} — DNI {clienteSeleccionado.dni}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="adm-field">
+                <label>DNI *</label>
+                <input
+                  type="text"
+                  value={nuevoCliente.dni}
+                  onChange={(e) => setNuevoCliente({ ...nuevoCliente, dni: e.target.value })}
+                  placeholder="Ej: 30123456"
+                />
+              </div>
+              <div className="adm-field">
+                <label>Nombre</label>
+                <input
+                  type="text"
                   value={nuevoCliente.nombre}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, nombre: e.target.value })}
                 />
+              </div>
+              <div className="adm-field">
+                <label>Apellido</label>
                 <input
                   type="text"
-                  placeholder="Apellido"
-                  style={inputMini}
                   value={nuevoCliente.apellido}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, apellido: e.target.value })}
                 />
+              </div>
+              <div className="adm-field">
+                <label>Teléfono</label>
                 <input
                   type="tel"
-                  placeholder="Teléfono"
-                  style={inputMini}
                   value={nuevoCliente.telefono}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, telefono: e.target.value })}
                 />
+              </div>
+              <div className="adm-field">
+                <label>Email</label>
                 <input
                   type="email"
-                  placeholder="Email"
-                  style={inputMini}
                   value={nuevoCliente.email}
                   onChange={(e) => setNuevoCliente({ ...nuevoCliente, email: e.target.value })}
                 />
               </div>
-            </div>
+            </>
           )}
-          {clienteSeleccionado && (
-            <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: '6px', fontSize: '0.85rem', color: '#6ee79f' }}>
-              ✓ {clienteSeleccionado.nombre || ''} {clienteSeleccionado.apellido || ''} — DNI {clienteSeleccionado.dni}
-            </div>
-          )}
-        </div>
+        </fieldset>
 
         <fieldset style={{ border: 'none', padding: 0, display: 'contents' }}>
           <legend style={{ fontWeight: 600, fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
