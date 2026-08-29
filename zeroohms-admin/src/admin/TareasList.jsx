@@ -56,7 +56,7 @@ export default function TareasList() {
         >
           Sin asignar
         </button>
-        {usuarios.map((u) => (
+        {usuarios.filter((u) => u.usuario !== 'admin').map((u) => (
           <button
             type="button"
             key={u.usuario}
