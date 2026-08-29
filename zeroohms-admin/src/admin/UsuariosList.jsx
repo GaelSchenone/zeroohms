@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Navigate, useOutletContext } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { Plus, SettingsCog2 } from 'pixelarticons/react'
 import UsuariosForm from './UsuariosForm.jsx'
 
 export default function UsuariosList() {
+  const { user } = useOutletContext() ?? {}
   const [usuarios, setUsuarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -47,6 +49,10 @@ export default function UsuariosList() {
   const handleSaved = () => {
     fetchUsuarios()
     handleCloseForm()
+  }
+
+  if (user && user.usuario !== 'admin') {
+    return <Navigate to="/" replace />
   }
 
   return (

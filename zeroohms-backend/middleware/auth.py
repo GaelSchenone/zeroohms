@@ -24,6 +24,12 @@ def get_current_user(
     return usuario
 
 
+def require_admin(usuario: str = Depends(get_current_user)) -> str:
+    if usuario != "admin":
+        raise HTTPException(status_code=403, detail="No tenés permiso para acceder a esta sección")
+    return usuario
+
+
 @dataclass
 class SesionSubida:
     tkid: int

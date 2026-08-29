@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from config.database import get_db
-from middleware.auth import get_current_user
+from middleware.auth import get_current_user, require_admin
 from models.usuario import Usuario
 from schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse
 from services.auth_service import hash_password
@@ -24,7 +24,7 @@ def list_usuarios(
 def create_usuario(
     body: UsuarioCreate,
     db: Session = Depends(get_db),
-    _usuario: str = Depends(get_current_user),
+    _usuario: str = Depends(require_admin),
 ):
     existing = db.query(Usuario).filter(Usuario.usuario == body.usuario).first()
     if existing:
@@ -50,7 +50,7 @@ def create_usuario(
 def get_usuario(
     usuario: str,
     db: Session = Depends(get_db),
-    _usuario: str = Depends(get_current_user),
+    _usuario: str = Depends(require_admin),
 ):
     user = db.query(Usuario).filter(Usuario.usuario == usuario).first()
     if not user:
@@ -63,7 +63,7 @@ def update_usuario(
     usuario: str,
     body: UsuarioUpdate,
     db: Session = Depends(get_db),
-    _usuario: str = Depends(get_current_user),
+    _usuario: str = Depends(require_admin),
 ):
     user = db.query(Usuario).filter(Usuario.usuario == usuario).first()
     if not user:
@@ -87,7 +87,7 @@ def update_usuario(
 def delete_usuario(
     usuario: str,
     db: Session = Depends(get_db),
-    _usuario: str = Depends(get_current_user),
+    _usuario: str = Depends(require_admin),
 ):
     user = db.query(Usuario).filter(Usuario.usuario == usuario).first()
     if not user:

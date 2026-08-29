@@ -26,7 +26,7 @@ const NAV_GROUPS = [
     label: 'Contactos',
     items: [
       { label: 'Clientes', icon: Users, to: '/clientes' },
-      { label: 'Usuarios', icon: Users, to: '/usuarios' },
+      { label: 'Usuarios', icon: Users, to: '/usuarios', adminOnly: true },
     ],
   },
   {
@@ -72,7 +72,7 @@ export default function AdminLayout() {
           {NAV_GROUPS.map((group) => (
             <div className="adm-nav-group" key={group.label}>
               <span className="adm-nav-group-label">{group.label}</span>
-              {group.items.map((item) => {
+              {group.items.filter((item) => !item.adminOnly || user?.usuario === 'admin').map((item) => {
                 const Icon = item.icon
                 const isActive = item.to === '/'
                   ? location.pathname === '/'
